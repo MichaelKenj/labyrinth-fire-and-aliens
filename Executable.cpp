@@ -2,5 +2,5 @@
 
 int main()
 {
-	std::cout << "Ani is intern\n";
+	std::cout << "Ani is senior\n";
 }
