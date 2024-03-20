@@ -1,24 +1,10 @@
 #pragma once
 #include <iostream>
 
-//
-//enum DIRECTION
-//{
-//	RIGHT,
-//	LEFT,
-//	DOWN,
-//	UP
-//};
-
 /// <summary>
 /// Can be (0, 0) to (19, 19)
 /// </summary>
-struct Coordinate
-{
-	std::size_t x;
-	std::size_t y;
-};
-
+using Coordinate = std::pair<std::size_t, std::size_t>;
 
 
 class Abstract_Player
@@ -36,7 +22,7 @@ public:
 
 	void setPosition(std::size_t x, std::size_t y)
 	{
-		_position.x = x;
-		_position.y = y;
+		_position.first = x;
+		_position.second = y;
 	}
 };

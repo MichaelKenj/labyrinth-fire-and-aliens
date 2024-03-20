@@ -10,11 +10,8 @@ class Labyrinth
 private:
 	Board _board;
 	Human_Player _player;
-	// TODO
-	// How to interact with fires or aliens? Should we use vector of enemies(Should we to use template for Labyrinth) 
-	// or smth like that?
-	// For example, after player's move to another cell, should be called function spread() for all fire or move() 
-	// for all aliens
+	std::vector < Coordinate > _fire_positions;
+	std::vector< Coordinate > _alien_positions;
 public:
 	Labyrinth() = default;
 
@@ -27,7 +24,7 @@ public:
 		}
 		else
 		{
-			generate_alien();
+			generate_aliens();
 		}
 	}
 
@@ -35,46 +32,61 @@ public:
 	{
 		// TODO
 		// Implement function, which generates labyrinth and set entrance and exit cell
+		//:(
 	}
 
 	//---------------FIRE----------------
 	void generate_fire()
 	{
 		// TODO
-		// Implement function, which choose randomly fire's count and put it into board
+		// Implement function, which chooses randomly fire's count and put it into board
 	}
 
 	void spread_fire()
 	{
 		// TODO
-		// Implement function, which spread fire to empty cells
+		// Implement function, which spreads fire to empty cells
 	}
 	//---------------FIRE----------------
 
 	//---------------ALIEN----------------
-	void generate_alien()
+	void generate_aliens()
 	{
 		// TODO
-		// Implement function, which choose randomly alien's count and put it into board
+		// Implement function, which chooses randomly alien's count and put it into board
 	}
 	//---------------ALIEN----------------
 
-	bool isValid() const
-	{
-		// if isWinable, isSolvableIn5Moves -> true
-	}
+	
 
-	bool isWinable() const
+	bool is_winable() const
 	{
 
 	}
 
-	bool isSolvableIn5Moves() const
+	bool is_solvable_in_5_moves() const
 	{
 
 	}
 
+	bool is_valid() const
+	{
+		if(is_winable() && is_solvable_in_5_moves())
+		{
+			return true;
+		}
+		return false;
+	}
 
+	bool is_player_on_fire() const 
+	{
+		return _board[_player.getPosition().first][_player.getPosition().second] == '@';
+	}
+
+	bool is_player_caught_by_alien() const 
+	{
+		return std::find(_alien_positions.begin(), _alien_positions.end(), _player.getPosition()) != _alien_positions.end();
+	}
 
 };
 
