@@ -4,6 +4,8 @@
 class Human_Player final : public Abstract_Player
 {
 public:
+    Human_Player(const Coordinate& position = { 1,1 }) : _isAlive(true), _h_position(position) {}
+
 	void move() 
 	{
 		// TODO
@@ -22,7 +24,7 @@ public:
 	// Implement function, which changes _isAlive status of player
 
 private:
-	Coordinate h_position;
+    Coordinate _h_position;
 	bool _isAlive;
 };
 
