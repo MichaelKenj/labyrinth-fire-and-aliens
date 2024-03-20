@@ -1,14 +1,14 @@
 #pragma once
 #include <iostream>
 
-
-enum DIRECTION
-{
-	RIGHT,
-	LEFT,
-	DOWN,
-	UP
-};
+//
+//enum DIRECTION
+//{
+//	RIGHT,
+//	LEFT,
+//	DOWN,
+//	UP
+//};
 
 /// <summary>
 /// Can be (0, 0) to (19, 19)

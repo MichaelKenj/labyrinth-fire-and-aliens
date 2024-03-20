@@ -1,37 +1,43 @@
 #pragma once
 #include "AlienPlayer.h"
-#include "HumanPlayer.h"
 #include "Labyrinth.h"
-#include "Game_Mode.h"
+#include "printHelperMethods.h"
 
 class Game
 {
 private:
 	Labyrinth _labyrinth;
+	GAME_MODE _game_mode;
 public:
 	Game()
 	{
-		
+		// TODO
+		// Here should be generated labyrinth
+
+		/// Here user choosing _game_mode
+		printInterface(_game_mode);
 	}
 
-	void start()
-	{
-		//kharcni fire te alien, stex kdrvi flagy
-	}
 
 	void play()
 	{
-
+		// TODO
+		// Implement here game logic
 	}
 
+	
+private:
 	void stop()
 	{
-
+		// TODO
+		// This function should be called in play(), if player loses. Should print GAME OVER, and stop all
+		// processes in play() 
 	}
 
 	void show_solution()
 	{
-
+		// TODO
+		// Implement function, which prints winning strategy from starting cell
 	}
 
 };
