@@ -45,11 +45,19 @@ private:
 public:
 	virtual void move() = 0;
 
+	/// <summary>
+	/// Sets player's position
+	/// </summary>
+	/// <param name="position"></param>
 	void setPosition(Coordinate position)
 	{
 		_position = position;
 	}
 
+	/// <summary>
+	/// Gives player's coordinates
+	/// </summary>
+	/// <returns></returns>
 	Coordinate getPosition() const
 	{
 		return _position;

@@ -34,6 +34,9 @@ private:
 		// processes in play() 
 	}
 
+	/// <summary>
+	/// Showing solution of labyrinth
+	/// </summary>
 	void show_solution()
 	{
 		// TODO

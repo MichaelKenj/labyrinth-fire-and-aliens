@@ -9,6 +9,9 @@ private:
 public:
     Human_Player(const Coordinate& position = { 1,1 }) : _isAlive(true), _h_position(position) {}
 
+	/// <summary>
+	/// Changes player's position depends on pressed button
+	/// </summary>
 	void move() 
 	{
 		// TODO
