@@ -43,9 +43,6 @@ Coordinate  generateRandomCoordinate(Coordinate coor1, Coordinate coor2)
 	return new_coor;
 }
 
-	// Generate and return the random number
-	return dis(gen);
-}
 class Abstract_Player
 {
 private:
