@@ -9,20 +9,6 @@ using Coordinate = std::pair<std::size_t, std::size_t>;
 
 class Abstract_Player
 {
-private:
-	Coordinate _position;
-
 public:
 	virtual void move() = 0;
-
-	Coordinate getPosition() const
-	{
-		return _position;
-	}
-
-	void setPosition(std::size_t x, std::size_t y)
-	{
-		_position.first = x;
-		_position.second = y;
-	}
 };
