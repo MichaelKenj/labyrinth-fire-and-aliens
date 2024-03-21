@@ -217,6 +217,19 @@ public:
 	{
 		// TODO
 		// Implement function, which chooses randomly fire's count and put it into board
+		std::size_t fire_count;
+		fire_count = generateRandomNumber(1, 3);
+		for (std::size_t i = 0; i < fire_count; ++i)
+		{
+			Coordinate new_coor;
+			do
+			{
+				new_coor = generateRandomCoordinate(Coordinate{ 1,1 }, Coordinate{ _board.size() - 2, _board.size() - 2 });
+			} while (is_wall(new_coor));
+			_board[new_coor.first][new_coor.second] = '@';
+			_fire_positions.push_back(new_coor);
+		}
+
 	}
 
 	void spread_fire()
@@ -263,6 +276,11 @@ public:
 	bool is_player_caught_by_alien() const 
 	{
 		return std::find(_alien_positions.begin(), _alien_positions.end(), _player.getPosition()) != _alien_positions.end();
+	}
+
+	bool is_wall(Coordinate coor) const
+	{
+		return _board[coor.first][coor.second] == '#';
 	}
 
 };
