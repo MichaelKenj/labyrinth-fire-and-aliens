@@ -4,5 +4,4 @@ int main()
 {
     Game game;
 	game.play();
-
 }

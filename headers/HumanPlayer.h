@@ -3,6 +3,9 @@
 
 class Human_Player final : public Abstract_Player
 {
+private:
+	Coordinate _h_position;
+	bool _isAlive;
 public:
     Human_Player(const Coordinate& position = { 1,1 }) : _isAlive(true), _h_position(position) {}
 
@@ -22,10 +25,10 @@ public:
 
 	// Maybe TODO
 	// Implement function, which changes _isAlive status of player
-
-private:
-    Coordinate _h_position;
-	bool _isAlive;
+	void kill_player()
+	{
+		_isAlive = false;
+	}
 };
 
 

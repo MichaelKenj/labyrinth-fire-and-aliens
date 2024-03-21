@@ -3,14 +3,10 @@
 #include "HumanPlayer.h"
 #include "Game_Mode.h"
 #include <iomanip>
-
-
-#include <iostream>
-#include<cstdlib>
-#include<stack>
-#include<ctime>
-#include<algorithm>
-
+#include <cstdlib>
+#include <stack>
+#include <ctime>
+#include <algorithm>
 
 using Board = std::vector<std::vector<char>>;
 enum { NORTH, SOUTH, EAST, WEST };
@@ -23,13 +19,13 @@ private:
 	std::size_t _size;
 	Coordinate _entrance;
 	std::vector < Coordinate > _fire_positions;
-	std::vector< Coordinate > _alien_positions;
+	std::vector < Coordinate > _alien_positions;
 public:
 	
 	Labyrinth(std::size_t _size = 20) : _size(_size)
 	{
 		_board.assign(_size, std::vector<char>(_size, '#'));
-        generateEntrance();
+        generate_entrance();
 		generate_board();
 	}
 
@@ -49,54 +45,7 @@ public:
 		}
 	}
 
-	std::size_t move_east_or_west(int direction, int x) 
-	{
-		if (direction == EAST)
-			return x + 1;
-		else if (direction == WEST)
-			return x - 1;
-		else
-			return x;
-	}
-
-	std::size_t move_north_or_south(int direction, int y) {
-		if (direction == NORTH)
-			return y - 1;
-		else if (direction == SOUTH)
-			return y + 1;
-		else
-			return y;
-	}
-
-	bool is_good_move(int x, int y, int direction, Board& grid) 
-	{
-		x = move_east_or_west(direction, x);
-		y = move_north_or_south(direction, y);
-
-		if (grid[y][x] == '.' || x >= (_size - 1) || x <= 0 || y <= 0 || y >= (_size - 1))
-			return false;
-		if (direction == NORTH) {
-			if (grid[y][x - 1] != '.' && grid[y - 1][x] != '.' && grid[y][x + 1] != '.' && grid[y - 1][x - 1] != '.' && grid[y - 1][x + 1] != '.')
-				return true;
-		}
-		if (direction == SOUTH) {
-			if (grid[y][x - 1] != '.' && grid[y + 1][x] != '.' && grid[y][x + 1] != '.' && grid[y + 1][x - 1] != '.' && grid[y + 1][x + 1] != '.')
-				return true;
-		}
-		if (direction == EAST) {
-			if (grid[y][x + 1] != '.' && grid[y - 1][x] != '.' && grid[y + 1][x] != '.' && grid[y - 1][x + 1] != '.' && grid[y + 1][x + 1] != '.') {
-				return true;
-			}
-		}
-		if (direction == WEST) {
-			if (grid[y][x - 1] != '.' && grid[y - 1][x] != '.' && grid[y + 1][x] != '.' && grid[y - 1][x - 1] != '.' && grid[y + 1][x - 1] != '.') {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	void generateEntrance() 
+	void generate_entrance() 
 	{
 		std::size_t side = generateRandomNumber(0, 3);
 		std::size_t entranceX;
@@ -123,20 +72,6 @@ public:
 		auto entrance = std::make_pair(entranceX, entranceY);
 		_entrance = entrance;
 
-	}
-
-	Coordinate generateStartForGenerating(Coordinate& entrance)
-	{
-		if (entrance.first != 0 && entrance.first != 19)
-		{
-			std::size_t y = (entrance.second == 0) ? entrance.second + 1 : entrance.second - 1;
-			return std::make_pair(entrance.first, y);
-		}
-		else if (entrance.second != 0 && entrance.second != 19)
-		{
-			std::size_t x = (entrance.first == 0) ? entrance.first + 1 : entrance.first - 1;
-			return std::make_pair(x, entrance.second);
-		}
 	}
 
 	void generate_board()
@@ -205,7 +140,7 @@ public:
 		_board[_entrance.first][_entrance.second] = '.';
 	}
 
-	void print_board() const 
+	void print() const 
 	{
 		for (const auto& row : _board) 
 		{
@@ -215,24 +150,6 @@ public:
 		}
 	}
 
-	std::vector<Coordinate> get_neighbouring_coordinates(Coordinate coor)
-	{
-		std::vector<Coordinate> res_vec;
-
-		if (coor.first > 0)
-			res_vec.push_back(Coordinate{ coor.first - 1, coor.second });
-
-		if (coor.first < 19)
-			res_vec.push_back(Coordinate{ coor.first + 1, coor.second });
-
-		if (coor.second > 0)
-			res_vec.push_back(Coordinate{ coor.first, coor.second - 1 });
-
-		if (coor.second < 19)
-			res_vec.push_back(Coordinate{ coor.first, coor.second + 1 });
-
-		return res_vec;
-	}
 	//---------------FIRE----------------
 	void generate_fire()
 	{
@@ -240,7 +157,6 @@ public:
 		// Implement function, which chooses randomly fire's count and put it into board
 		std::size_t fire_count;
 		fire_count = generateRandomNumber(1, 3);
-		std::cout << "\nFire count: " << fire_count << '\n';
 		for (std::size_t i = 0; i < fire_count; ++i)
 		{
 			Coordinate new_coor;
@@ -282,10 +198,21 @@ public:
 	{
 		// TODO
 		// Implement function, which chooses randomly alien's count and put it into board
+		std::size_t alien_count;
+		alien_count = generateRandomNumber(3, 5);
+		std::cout << "\nAlien count: " << alien_count << '\n';
+		for (std::size_t i = 0; i < alien_count; ++i)
+		{
+			Coordinate new_coor;
+			do
+			{
+				new_coor = generateRandomCoordinate(Coordinate{ 1,1 }, Coordinate{ _board.size() - 2, _board.size() - 2 });
+			} while (is_wall(new_coor));
+			_board[new_coor.first][new_coor.second] = '&';
+			_fire_positions.push_back(new_coor);
+		}
 	}
 	//---------------ALIEN----------------
-
-	
 
 	bool is_winable() const
 	{
@@ -324,6 +251,91 @@ public:
 	bool is_empty_space(Coordinate coor) const
 	{
 		return _board[coor.first][coor.second] == '.';
+	}
+
+
+/// <summary>
+/// Helper functions to generate board
+/// </summary>
+private:
+	Coordinate generateStartForGenerating(Coordinate& entrance)
+	{
+		if (entrance.first != 0 && entrance.first != 19)
+		{
+			std::size_t y = (entrance.second == 0) ? entrance.second + 1 : entrance.second - 1;
+			return std::make_pair(entrance.first, y);
+		}
+		else if (entrance.second != 0 && entrance.second != 19)
+		{
+			std::size_t x = (entrance.first == 0) ? entrance.first + 1 : entrance.first - 1;
+			return std::make_pair(x, entrance.second);
+		}
+	}
+
+	std::vector<Coordinate> get_neighbouring_coordinates(Coordinate coor)
+	{
+		std::vector<Coordinate> res_vec;
+
+		if (coor.first > 0)
+			res_vec.push_back(Coordinate{ coor.first - 1, coor.second });
+
+		if (coor.first < 19)
+			res_vec.push_back(Coordinate{ coor.first + 1, coor.second });
+
+		if (coor.second > 0)
+			res_vec.push_back(Coordinate{ coor.first, coor.second - 1 });
+
+		if (coor.second < 19)
+			res_vec.push_back(Coordinate{ coor.first, coor.second + 1 });
+
+		return res_vec;
+	}
+
+	std::size_t move_east_or_west(int direction, int x)
+	{
+		if (direction == EAST)
+			return x + 1;
+		else if (direction == WEST)
+			return x - 1;
+		else
+			return x;
+	}
+
+	std::size_t move_north_or_south(int direction, int y) {
+		if (direction == NORTH)
+			return y - 1;
+		else if (direction == SOUTH)
+			return y + 1;
+		else
+			return y;
+	}
+
+	bool is_good_move(int x, int y, int direction, Board& grid)
+	{
+		x = move_east_or_west(direction, x);
+		y = move_north_or_south(direction, y);
+
+		if (grid[y][x] == '.' || x >= (_size - 1) || x <= 0 || y <= 0 || y >= (_size - 1))
+			return false;
+		if (direction == NORTH) {
+			if (grid[y][x - 1] != '.' && grid[y - 1][x] != '.' && grid[y][x + 1] != '.' && grid[y - 1][x - 1] != '.' && grid[y - 1][x + 1] != '.')
+				return true;
+		}
+		if (direction == SOUTH) {
+			if (grid[y][x - 1] != '.' && grid[y + 1][x] != '.' && grid[y][x + 1] != '.' && grid[y + 1][x - 1] != '.' && grid[y + 1][x + 1] != '.')
+				return true;
+		}
+		if (direction == EAST) {
+			if (grid[y][x + 1] != '.' && grid[y - 1][x] != '.' && grid[y + 1][x] != '.' && grid[y - 1][x + 1] != '.' && grid[y + 1][x + 1] != '.') {
+				return true;
+			}
+		}
+		if (direction == WEST) {
+			if (grid[y][x - 1] != '.' && grid[y - 1][x] != '.' && grid[y + 1][x] != '.' && grid[y - 1][x - 1] != '.' && grid[y + 1][x - 1] != '.') {
+				return true;
+			}
+		}
+		return false;
 	}
 };
 

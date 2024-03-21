@@ -38,6 +38,7 @@ private:
 	{
 		// TODO
 		// Implement function, which prints winning strategy from starting cell
+		// This function should be called in stop(), if player wants
 	}
 
 };
