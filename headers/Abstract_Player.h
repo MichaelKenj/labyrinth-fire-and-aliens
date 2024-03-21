@@ -19,7 +19,7 @@ public:
 		_position = position;
 	}
 
-	Coordinate getPosition()
+	Coordinate getPosition() const
 	{
 		return _position;
 	}
