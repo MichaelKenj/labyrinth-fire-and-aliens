@@ -3,6 +3,9 @@
 #include "HumanPlayer.h"
 #include "Game_Mode.h"
 #include <iomanip>
+#include <set>
+
+
 
 using Board = std::vector<std::vector<char>>;
 
@@ -49,6 +52,24 @@ public:
 		}
 	}
 
+	std::vector<Coordinate> get_neighbouring_coordinates(Coordinate coor)
+	{
+		std::vector<Coordinate> res_vec;
+
+		if (coor.first > 0)
+			res_vec.push_back(Coordinate{ coor.first - 1, coor.second });
+
+		if (coor.first < 19)
+			res_vec.push_back(Coordinate{ coor.first + 1, coor.second });
+
+		if (coor.second > 0)
+			res_vec.push_back(Coordinate{ coor.first, coor.second - 1 });
+
+		if (coor.second < 19)
+			res_vec.push_back(Coordinate{ coor.first, coor.second + 1 });
+
+		return res_vec;
+	}
 	//---------------FIRE----------------
 	void generate_fire()
 	{
@@ -56,6 +77,7 @@ public:
 		// Implement function, which chooses randomly fire's count and put it into board
 		std::size_t fire_count;
 		fire_count = generateRandomNumber(1, 3);
+		std::cout << "\nFire count: " << fire_count << '\n';
 		for (std::size_t i = 0; i < fire_count; ++i)
 		{
 			Coordinate new_coor;
@@ -72,7 +94,23 @@ public:
 	void spread_fire()
 	{
 		// TODO
-		// Implement function, which spreads fire to empty cells
+	  	// Implement function, which spreads fire to empty cells
+		std::vector<Coordinate> newFirePositions;
+
+		for (const auto& firePosition : _fire_positions)
+		{
+			auto neighbors = get_neighbouring_coordinates(firePosition);
+			for (const auto& neighbor : neighbors)
+			{
+				if (!is_wall(neighbor) && _board[neighbor.first][neighbor.second] != '@')
+				{
+					newFirePositions.push_back(neighbor);
+					_board[neighbor.first][neighbor.second] = '@';
+				}
+			}
+		}
+
+		_fire_positions.insert(_fire_positions.end(), newFirePositions.begin(), newFirePositions.end());
 	}
 	//---------------FIRE----------------
 
@@ -88,7 +126,7 @@ public:
 
 	bool is_winable() const
 	{
-
+		
 	}
 
 	bool is_solvable_in_5_moves() const
@@ -120,5 +158,9 @@ public:
 		return _board[coor.first][coor.second] == '#';
 	}
 
+	bool is_empty_space(Coordinate coor) const
+	{
+		return _board[coor.first][coor.second] == '.';
+	}
 };
 
