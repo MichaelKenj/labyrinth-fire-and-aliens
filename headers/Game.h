@@ -15,7 +15,7 @@ public:
 		// Here should be generated labyrinth
 
 		/// Here user choosing _game_mode
-		printInterface(_game_mode);
+		print_interface(_game_mode);
 	}
 
 

@@ -15,7 +15,7 @@ using Coordinate = std::pair<std::size_t, std::size_t>;
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <returns></returns>
-std::size_t generateRandomNumber(std::size_t x, std::size_t y) {
+std::size_t generate_random_number(std::size_t x, std::size_t y) {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 
@@ -30,11 +30,11 @@ std::size_t generateRandomNumber(std::size_t x, std::size_t y) {
 /// <param name="coor1"></param>
 /// <param name="coor2"></param>
 /// <returns></returns>
-Coordinate  generateRandomCoordinate(Coordinate coor1, Coordinate coor2)
+Coordinate  generate_random_coordinate(Coordinate coor1, Coordinate coor2)
 {
 	Coordinate new_coor;
-	new_coor.first = generateRandomNumber(coor1.first, coor2.first);
-	new_coor.second = generateRandomNumber(coor1.second, coor2.second);
+	new_coor.first = generate_random_number(coor1.first, coor2.first);
+	new_coor.second = generate_random_number(coor1.second, coor2.second);
 	return new_coor;
 }
 
@@ -49,7 +49,7 @@ public:
 	/// Sets player's position
 	/// </summary>
 	/// <param name="position"></param>
-	void setPosition(Coordinate position)
+	void set_position(Coordinate position)
 	{
 		_position = position;
 	}
@@ -58,7 +58,7 @@ public:
 	/// Gives player's coordinates
 	/// </summary>
 	/// <returns></returns>
-	Coordinate getPosition() const
+	Coordinate get_position() const
 	{
 		return _position;
 	}

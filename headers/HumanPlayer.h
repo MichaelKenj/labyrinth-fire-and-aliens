@@ -5,9 +5,9 @@ class Human_Player final : public Abstract_Player
 {
 private:
 	Coordinate _h_position;
-	bool _isAlive;
+	bool _is_alive;
 public:
-    Human_Player(const Coordinate& position = { 1,1 }) : _isAlive(true), _h_position(position) {}
+    Human_Player(const Coordinate& position = { 1,1 }) : _is_alive(true), _h_position(position) {}
 
 	/// <summary>
 	/// Changes player's position depends on pressed button
@@ -18,19 +18,19 @@ public:
 		// Implement function, which changes position in board
 	}
 
-	// getPosition
-	// setPosition
+	// get_position
+	// set_position
 
-	bool isAlive() const
+	bool is_alive() const
 	{
-		return _isAlive;
+		return _is_alive;
 	}
 
 	// Maybe TODO
-	// Implement function, which changes _isAlive status of player
+	// Implement function, which changes _is_alive status of player
 	void kill_player()
 	{
-		_isAlive = false;
+		_is_alive = false;
 	}
 };
 

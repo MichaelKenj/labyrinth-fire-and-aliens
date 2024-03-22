@@ -74,9 +74,9 @@ public:
 
 
 	/// <summary>
-	/// Prints board. Prints aliens as a green, fire as a red
+	/// Prints board. Prints aliens as green, fire as red
 	/// </summary>
-	void print() const 
+	void print_board() const 
 	{
 		for (const auto& row : _board) 
 		{
@@ -110,7 +110,7 @@ public:
 	{
 		// Choosing fire count randomly[1-3]
 		std::size_t fire_count;
-		fire_count = generateRandomNumber(1, 3);
+		fire_count = generate_random_number(1, 3);
 
 		// Generating random coordinates of fires and push_back-ing them into _fire_positions
 		for (std::size_t i = 0; i < fire_count; ++i)
@@ -120,7 +120,7 @@ public:
 			// Generating new coordinates, while coordinate is a wall
 			do
 			{
-				new_coor = generateRandomCoordinate(Coordinate{ 1,1 }, Coordinate{ _board.size() - 2, _board.size() - 2 });
+				new_coor = generate_random_coordinate(Coordinate{ 1,1 }, Coordinate{ _board.size() - 2, _board.size() - 2 });
 			} while (is_wall(new_coor));
 
 			// Setting '@' into board
@@ -171,7 +171,7 @@ public:
 	{
 		// Choosing fire count randomly[3-5]
 		std::size_t alien_count;
-		alien_count = generateRandomNumber(3, 5);
+		alien_count = generate_random_number(3, 5);
 
 		// Generating random coordinates of aliens and push_back-ing them into _alien_positions
 		for (std::size_t i = 0; i < alien_count; ++i)
@@ -181,7 +181,7 @@ public:
 			// Generating new coordinates, while coordinate is a wall
 			do
 			{
-				new_coor = generateRandomCoordinate(Coordinate{ 1,1 }, Coordinate{ _board.size() - 2, _board.size() - 2 });
+				new_coor = generate_random_coordinate(Coordinate{ 1,1 }, Coordinate{ _board.size() - 2, _board.size() - 2 });
 			} while (is_wall(new_coor));
 
 			// Setting '&' into board
@@ -213,12 +213,12 @@ public:
 
 	bool is_player_on_fire() const 
 	{
-		return _board[_player.getPosition().first][_player.getPosition().second] == '@';
+		return _board[_player.get_position().first][_player.get_position().second] == '@';
 	}
 
 	bool is_player_caught_by_alien() const 
 	{
-		return std::find(_alien_positions.begin(), _alien_positions.end(), _player.getPosition()) != _alien_positions.end();
+		return std::find(_alien_positions.begin(), _alien_positions.end(), _player.get_position()) != _alien_positions.end();
 	}
 
 	bool is_wall(Coordinate coor) const
@@ -236,7 +236,7 @@ public:
 /// Helper functions to generate board
 /// </summary>
 private:
-	Coordinate generateStartForGenerating(Coordinate& entrance)
+	Coordinate generate_start_for_generating(Coordinate& entrance)
 	{
 		if (entrance.first != 0 && entrance.first != 19)
 		{
@@ -318,26 +318,26 @@ private:
 
 	void generate_entrance()
 	{
-		std::size_t side = generateRandomNumber(0, 3);
+		std::size_t side = generate_random_number(0, 3);
 		std::size_t entranceX;
 		std::size_t entranceY;
 		switch (side)
 		{
 		case 0:
-			entranceX = generateRandomNumber(1, 18);
+			entranceX = generate_random_number(1, 18);
 			entranceY = 0;
 			break;
 		case 1:
 			entranceX = 19;
-			entranceY = generateRandomNumber(1, 18);
+			entranceY = generate_random_number(1, 18);
 			break;
 		case 2:
-			entranceX = generateRandomNumber(1, 18);
+			entranceX = generate_random_number(1, 18);
 			entranceY = 19;
 			break;
 		case 3:
 			entranceX = 0;
-			entranceY = generateRandomNumber(1, 18);
+			entranceY = generate_random_number(1, 18);
 			break;
 		}
 		auto entrance = std::make_pair(entranceX, entranceY);
@@ -348,7 +348,7 @@ private:
 	void generate_board()
 	{
 		srand(time(0));
-		Coordinate start = generateStartForGenerating(_entrance);
+		Coordinate start = generate_start_for_generating(_entrance);
 		std::size_t locX = start.second;
 		std::size_t locY = start.first;
 		for (int i = 0; i < _size; ++i)
@@ -411,4 +411,3 @@ private:
 		_board[_entrance.first][_entrance.second] = '.';
 	}
 };
-
