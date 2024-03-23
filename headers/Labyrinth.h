@@ -271,7 +271,7 @@ private:
 		if (coor.second > 0)
 			res_vec.push_back(Coordinate{ coor.first, coor.second - 1 });
 
-		if (coor.second < _board.size() - 1)
+		if (coor.second < _size)
 			res_vec.push_back(Coordinate{ coor.first, coor.second + 1 });
 
 		return res_vec;
