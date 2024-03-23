@@ -122,7 +122,7 @@ public:
 			{
 				new_coor = generate_random_coordinate(
 					Coordinate{ 1,1 },
-					Coordinate{ _board.size() - 2, _board.size() - 2 }
+					Coordinate{ _size - 2, _size - 2 }
 				);
 			} while (is_wall(new_coor));
 
@@ -186,7 +186,7 @@ public:
 			{
 				new_coor = generate_random_coordinate(
 					Coordinate{ 1,1 }, 
-					Coordinate{ _board.size() - 2, _board.size() - 2 });
+					Coordinate{ _size - 2, _size - 2 });
 			} while (is_wall(new_coor));
 
 			// Setting '&' into board
