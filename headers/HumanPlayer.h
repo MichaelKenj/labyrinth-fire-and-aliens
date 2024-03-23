@@ -4,10 +4,10 @@
 class Human_Player final : public Abstract_Player
 {
 private:
-	Coordinate _h_position;
-	bool _is_alive;
+	Coordinate m_position;
+	bool m_isAlive;
 public:
-    Human_Player(const Coordinate& position = { 1,1 }) : _is_alive(true), _h_position(position) {}
+    Human_Player(Coordinate position = { 1,1 }) : m_isAlive(true), m_position(position) {}
 
 	/// <summary>
 	/// Changes player's position depends on pressed button
@@ -18,19 +18,33 @@ public:
 		// Implement function, which changes position in board
 	}
 
-	// get_position
-	// set_position
+	/// <summary>
+	/// Sets playes's position
+	/// </summary>
+	/// <param name="position"></param>
+	void setPosition(Coordinate position)
+	{
+		m_position = position;
+	}
+
+	/// <summary>
+	/// Gives player's current position
+	/// </summary>
+	/// <returns></returns>
+	Coordinate get_position() const 
+	{
+		return m_position;
+	}
 
 	bool is_alive() const
 	{
-		return _is_alive;
+		return m_isAlive;
 	}
 
-	// Maybe TODO
-	// Implement function, which changes _is_alive status of player
+	// Is this useless?
 	void kill_player()
 	{
-		_is_alive = false;
+		m_isAlive = false;
 	}
 };
 
