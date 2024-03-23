@@ -120,7 +120,10 @@ public:
 			// Generating new coordinates, while coordinate is a wall
 			do
 			{
-				new_coor = generate_random_coordinate(Coordinate{ 1,1 }, Coordinate{ _board.size() - 2, _board.size() - 2 });
+				new_coor = generate_random_coordinate(
+					Coordinate{ 1,1 },
+					Coordinate{ _board.size() - 2, _board.size() - 2 }
+				);
 			} while (is_wall(new_coor));
 
 			// Setting '@' into board
@@ -181,7 +184,9 @@ public:
 			// Generating new coordinates, while coordinate is a wall
 			do
 			{
-				new_coor = generate_random_coordinate(Coordinate{ 1,1 }, Coordinate{ _board.size() - 2, _board.size() - 2 });
+				new_coor = generate_random_coordinate(
+					Coordinate{ 1,1 }, 
+					Coordinate{ _board.size() - 2, _board.size() - 2 });
 			} while (is_wall(new_coor));
 
 			// Setting '&' into board
@@ -218,7 +223,10 @@ public:
 
 	bool is_player_caught_by_alien() const 
 	{
-		return std::find(_alien_positions.begin(), _alien_positions.end(), _player.get_position()) != _alien_positions.end();
+		return std::find(
+			_alien_positions.begin(), 
+			_alien_positions.end(), 
+			_player.get_position()) != _alien_positions.end();
 	}
 
 	bool is_wall(Coordinate coor) const
@@ -236,34 +244,34 @@ public:
 /// Helper functions to generate board
 /// </summary>
 private:
-	Coordinate generate_start_for_generating(Coordinate& entrance)
+	Coordinate generate_start_for_generating(const Coordinate& entrance)
 	{
-		if (entrance.first != 0 && entrance.first != 19)
+		if (entrance.first != 0 && entrance.first != _size - 1)
 		{
 			std::size_t y = (entrance.second == 0) ? entrance.second + 1 : entrance.second - 1;
 			return std::make_pair(entrance.first, y);
 		}
-		else if (entrance.second != 0 && entrance.second != 19)
+		else if (entrance.second != 0 && entrance.second != _size - 1)
 		{
 			std::size_t x = (entrance.first == 0) ? entrance.first + 1 : entrance.first - 1;
 			return std::make_pair(x, entrance.second);
 		}
 	}
 
-	std::vector<Coordinate> get_neighbouring_coordinates(Coordinate coor)
+	std::vector<Coordinate> get_neighbouring_coordinates(const Coordinate coor)
 	{
 		std::vector<Coordinate> res_vec;
 
 		if (coor.first > 0)
 			res_vec.push_back(Coordinate{ coor.first - 1, coor.second });
 
-		if (coor.first < 19)
+		if (coor.first < _size)
 			res_vec.push_back(Coordinate{ coor.first + 1, coor.second });
 
 		if (coor.second > 0)
 			res_vec.push_back(Coordinate{ coor.first, coor.second - 1 });
 
-		if (coor.second < 19)
+		if (coor.second < _board.size() - 1)
 			res_vec.push_back(Coordinate{ coor.first, coor.second + 1 });
 
 		return res_vec;
@@ -288,7 +296,7 @@ private:
 			return y;
 	}
 
-	bool is_good_move(int x, int y, int direction, Board& grid)
+	bool is_good_move(int x, int y, int direction, const Board& grid)
 	{
 		x = move_east_or_west(direction, x);
 		y = move_north_or_south(direction, y);
@@ -319,28 +327,28 @@ private:
 	void generate_entrance()
 	{
 		std::size_t side = generate_random_number(0, 3);
-		std::size_t entranceX;
-		std::size_t entranceY;
+		std::size_t entrance_x;
+		std::size_t entrance_y;
 		switch (side)
 		{
 		case 0:
-			entranceX = generate_random_number(1, 18);
-			entranceY = 0;
+			entrance_x = generate_random_number(1, _size - 2);
+			entrance_y = 0;
 			break;
 		case 1:
-			entranceX = 19;
-			entranceY = generate_random_number(1, 18);
+			entrance_x = _size - 1;
+			entrance_y = generate_random_number(1, _size - 2);
 			break;
 		case 2:
-			entranceX = generate_random_number(1, 18);
-			entranceY = 19;
+			entrance_x = generate_random_number(1, _size - 2);
+			entrance_y = _size - 1;
 			break;
 		case 3:
-			entranceX = 0;
-			entranceY = generate_random_number(1, 18);
+			entrance_x = 0;
+			entrance_y = generate_random_number(1, _size - 2);
 			break;
 		}
-		auto entrance = std::make_pair(entranceX, entranceY);
+		auto entrance = std::make_pair(entrance_x, entrance_y);
 		_entrance = entrance;
 
 	}
@@ -349,65 +357,65 @@ private:
 	{
 		srand(time(0));
 		Coordinate start = generate_start_for_generating(_entrance);
-		std::size_t locX = start.second;
-		std::size_t locY = start.first;
-		for (int i = 0; i < _size; ++i)
+		std::size_t loc_x = start.second;
+		std::size_t loc_y = start.first;
+		for (std::size_t i = 0; i < _size; ++i)
 		{
-			for (int j = 0; j < _size; ++j)
+			for (std::size_t j = 0; j < _size; ++j)
 				_board[i][j] = '#';
 		}
 
-		std::stack<int> xValues;
-		std::stack<int> yValues;
+		std::stack< std::size_t > x_values;
+		std::stack< std::size_t > y_values;
 
 		std::size_t good_move_counter = 0;
 		std::size_t direction = 0;
 
 		do {
 			//find n good moves
-			for (int i = 0; i < 4; i++) {
-				if (is_good_move(locX, locY, i, _board))
+			for (std::size_t i = 0; i < 4; ++i) {
+				if (is_good_move(loc_x, loc_y, i, _board))
 					++good_move_counter;
 			}
 
 			// if only 1 good move, move there
 			if (good_move_counter == 1)
 			{
-				if (is_good_move(locX, locY, NORTH, _board))
-					locY = move_north_or_south(NORTH, locY);
-				else if (is_good_move(locX, locY, SOUTH, _board))
-					locY = move_north_or_south(SOUTH, locY);
-				else if (is_good_move(locX, locY, EAST, _board))
-					locX = move_east_or_west(EAST, locX);
-				else if (is_good_move(locX, locY, WEST, _board))
-					locX = move_east_or_west(WEST, locX);
+				if (is_good_move(loc_x, loc_y, NORTH, _board))
+					loc_y = move_north_or_south(NORTH, loc_y);
+				else if (is_good_move(loc_x, loc_y, SOUTH, _board))
+					loc_y = move_north_or_south(SOUTH, loc_y);
+				else if (is_good_move(loc_x, loc_y, EAST, _board))
+					loc_x = move_east_or_west(EAST, loc_x);
+				else if (is_good_move(loc_x, loc_y, WEST, _board))
+					loc_x = move_east_or_west(WEST, loc_x);
 			}
 
 			// if no good moves, move back in stack
 			else if (good_move_counter == 0) {
-				locX = xValues.top();
-				locY = yValues.top();
-				xValues.pop();
-				yValues.pop();
+				loc_x = x_values.top();
+				loc_y = y_values.top();
+				x_values.pop();
+				y_values.pop();
 			}
 
 			//if more than 1 good move, push stack
 			else if (good_move_counter > 1)
 			{
-				xValues.push(locX);
-				yValues.push(locY);
+				x_values.push(loc_x);
+				y_values.push(loc_y);
 				do
 				{
 					direction = rand() % 4;
-				} while (!is_good_move(locX, locY, direction, _board));
+				} while (!is_good_move(loc_x, loc_y, direction, _board));
 
-				locX = move_east_or_west(direction, locX);
-				locY = move_north_or_south(direction, locY);
+				loc_x = move_east_or_west(direction, loc_x);
+				loc_y = move_north_or_south(direction, loc_y);
 			}
-			_board[locY][locX] = '.';
+			_board[loc_y][loc_x] = '.';
 			good_move_counter = 0;
 
-		} while (!xValues.empty());
+		} while (!x_values.empty());
 		_board[_entrance.first][_entrance.second] = '.';
 	}
 };

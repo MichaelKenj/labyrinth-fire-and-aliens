@@ -43,6 +43,9 @@ class Abstract_Player
 private:
 	Coordinate _position;
 public:
+
+	virtual ~Abstract_Player() {}
+
 	virtual void move() = 0;
 
 	/// <summary>
@@ -62,4 +65,6 @@ public:
 	{
 		return _position;
 	}
+
+
 };

@@ -16,6 +16,9 @@ public:
 
 		/// Here user choosing _game_mode
 		print_interface(_game_mode);
+
+		/// Generating labyrinth based on game mode
+		_labyrinth = Labyrinth(_game_mode);
 	}
 
 
