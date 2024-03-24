@@ -57,5 +57,5 @@ public:
 	/// Gives player's coordinates
 	/// </summary>
 	/// <returns></returns>
-	virtual Coordinate get_position() const = 0;
+	virtual Coordinate getPosition() const = 0;
 };
