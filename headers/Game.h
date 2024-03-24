@@ -22,7 +22,7 @@ public:
 		system("cls");
 
 		/// Generating labyrinth based on game mode
-		m_labyrinth = Labyrinth(m_gameMode, 23);
+		m_labyrinth = Labyrinth(m_gameMode);
 	}
 
 	/// <summary>
