@@ -17,9 +17,12 @@ public:
 
 		/// Here user choose _game_mode
 		gameModeSetter();
+
+		/// Clearing menu to start the gameplay
 		system("cls");
+
 		/// Generating labyrinth based on game mode
-		m_labyrinth = Labyrinth(m_gameMode);
+		m_labyrinth = Labyrinth(m_gameMode, 23);
 	}
 
 	/// <summary>
@@ -32,22 +35,25 @@ public:
 		while (true)
 		{
 			m_labyrinth.printBoard();
+			bool isPlayerMoved;
 			char press = _getche();
 			switch (press)
 			{
 			case 'w':
-				m_labyrinth.movePlayer(UP);
+				isPlayerMoved = m_labyrinth.movePlayer(UP);
 				break;
 			case 'd':
-				m_labyrinth.movePlayer(RIGHT);
+				isPlayerMoved = m_labyrinth.movePlayer(RIGHT);
 				break;
 			case 's':
-				m_labyrinth.movePlayer(DOWN);
+				isPlayerMoved = m_labyrinth.movePlayer(DOWN);
 				break;
 			case 'a':
-				m_labyrinth.movePlayer(LEFT);
+				isPlayerMoved = m_labyrinth.movePlayer(LEFT);
 				break;
 			}
+			if(isPlayerMoved)
+				m_labyrinth.moveEnemies(m_gameMode);
 			system("cls");	
 		}
 	}
@@ -56,7 +62,7 @@ public:
 	/// Temprorary function, should be removed in the end
 	/// </summary>
 	/// <returns></returns>
-	Labyrinth& getLabyrinth()
+	Labyrinth getLabyrinth()
 	{
 		return m_labyrinth;
 	}

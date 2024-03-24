@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <stack>
 #include <ctime>
+#include <queue>
 #include <algorithm>
 #include <windows.h>
 #include "HumanPlayer.h"
@@ -118,49 +119,33 @@ public:
 	//----------HUMAN_PLAYER-------------
 
 	/// <summary>
-	/// Puts player on the start-entrance cell
-	/// </summary>
-	void putPlayerIntoBoard()
-	{
-		m_board[m_entrance.first][m_entrance.second] = '±';
-	}
-
-	/// <summary>
-	/// Updates player's position on the board
-	/// </summary>
-	void updatePlayerPosition()
-	{
-		m_board[m_player.get_position().first][m_player.get_position().second] = '±';
-	}
-
-	/// <summary>
 	/// Changes player's position depends on direction
 	/// </summary>
 	/// <param name="direction"></param>
-	void movePlayer(DIRECTION direction)
+	bool movePlayer(DIRECTION direction)
 	{
 		//                 UP, DOWN, LEFT, RIGHT
 		//const int dx[4] = { -1, 1, 0, 0 };
 		//const int dy[4] = { 0, 0, -1, 1 };
-		Coordinate prevCoordinate = m_player.get_position();
+		Coordinate prevCoordinate = m_player.getPosition();
 		Coordinate newPossibleCoordinate;
 
 		switch (direction)
 		{
 		case UP:
-			newPossibleCoordinate = Coordinate{ m_player.get_position().first + dx[0], m_player.get_position().second + dy[0] };
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[0], m_player.getPosition().second + dy[0] };
 			break;
 			// -1 0
 		case DOWN:
-			newPossibleCoordinate = Coordinate{ m_player.get_position().first + dx[1], m_player.get_position().second + dy[1] };
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[1], m_player.getPosition().second + dy[1] };
 			break;
 			// +1 0
 		case LEFT:
-			newPossibleCoordinate = Coordinate{ m_player.get_position().first + dx[2], m_player.get_position().second + dy[2] };
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[2], m_player.getPosition().second + dy[2] };
 			break;
 			// 0 -1
 		case RIGHT:
-			newPossibleCoordinate = Coordinate{ m_player.get_position().first + dx[3], m_player.get_position().second + dy[3] };
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[3], m_player.getPosition().second + dy[3] };
 			break;
 			// 0 +1
 		}
@@ -169,104 +154,23 @@ public:
 			m_player.setPosition(newPossibleCoordinate);
 			updatePlayerPosition();
 			m_board[prevCoordinate.first][prevCoordinate.second] = '.';
+			return true;
 		}
+		return false;
 	}
 	//----------HUMAN_PLAYER-------------
-	
-	//---------------FIRE----------------
-	
-	/// <summary>
-	/// Chooses randomly fire's count[1-3] and put it into board
-	/// </summary>
-	void generateFire()
-	{
-		// Choosing fire count randomly[1-3]
-		std::size_t fire_count;
-		fire_count = generateRandomNumber(1, 3);
 
-		// Generating random coordinates of fires and push_back-ing them into _enemy_positions
-		for (std::size_t i = 0; i < fire_count; ++i)
-		{
-			Coordinate new_coor;
-
-			// Generating new coordinates, while coordinate is a wall
-			do
-			{
-				new_coor = generateRandomCoordinate(
-					Coordinate{ 1,1 },
-					Coordinate{ m_size - 2, m_size - 2 }
-				);
-			} while (isWall(new_coor));
-
-			// Setting '@' into board
-			m_board[new_coor.first][new_coor.second] = '@';
-
-			m_enemyPositions.push_back(new_coor);
-		}
-	}
+	//---------------ENEMY----------------
 
 	/// <summary>
-	/// Spread fire to empty neighbouring cells
+	/// Doing move logic based on game mode(Spreading fire if mode is FIRE, moving aliens on the other hand)
 	/// </summary>
-	void spreadFire()
+	/// <param name="game_mode"></param>
+	void moveEnemies(GAME_MODE game_mode)
 	{
-		// Vector for neighbouring empty cells of already existing fire cells
-		std::vector<Coordinate> newFirePositions;
-
-		// Traversing on already existing fire cells
-		for (const auto& firePosition : m_enemyPositions)
-		{
-			// Finding and filling vector by neighbouring cells of current cell
-			auto neighbors = getNeighbouringCoordinates(firePosition);
-
-			// Checking, if neighbour cell is a wall or its another fire, we dont push into newFirePositions
-			for (const auto& neighbor : neighbors)
-			{
-				// Checking statement
-				if (!isWall(neighbor) && m_board[neighbor.first][neighbor.second] != '@')
-				{
-					newFirePositions.push_back(neighbor);
-					m_board[neighbor.first][neighbor.second] = '@';
-				}
-			}
-		}
-
-		// Adding new fire positions into _enemy_positions
-		m_enemyPositions.insert(m_enemyPositions.end(), newFirePositions.begin(), newFirePositions.end());
+		game_mode == FIRE ? spreadFire() : moveAliens();
 	}
-	//---------------FIRE----------------
-
-	//---------------ALIEN----------------
-
-	/// <summary>
-	/// Chooses randomly aliens's count(3-5) and put it into board
-	/// </summary>
-	void generateAliens()
-	{
-		// Choosing fire count randomly[3-5]
-		std::size_t alien_count;
-		alien_count = generateRandomNumber(3, 5);
-
-		// Generating random coordinates of aliens and push_back-ing them into _enemy_positions
-		for (std::size_t i = 0; i < alien_count; ++i)
-		{
-			Coordinate new_coor;
-
-			// Generating new coordinates, while coordinate is a wall
-			do
-			{
-				new_coor = generateRandomCoordinate(
-					Coordinate{ 1,1 }, 
-					Coordinate{ m_size - 2, m_size - 2 });
-			} while (isWall(new_coor));
-
-			// Setting '&' into board
-			m_board[new_coor.first][new_coor.second] = '&';
-
-			m_enemyPositions.push_back(new_coor);
-		}
-	}
-	//---------------ALIEN----------------
+	//---------------ENEMY----------------
 
 	bool isWinable() const
 	{
@@ -288,7 +192,7 @@ public:
 
 	bool isPlayerOnFire() const 
 	{
-		return m_board[m_player.get_position().first][m_player.get_position().second] == '@';
+		return m_board[m_player.getPosition().first][m_player.getPosition().second] == '@';
 	}
 
 	bool isPlayerCaughtByAlien() const 
@@ -296,7 +200,7 @@ public:
 		return std::find(
 			m_enemyPositions.begin(), 
 			m_enemyPositions.end(), 
-			m_player.get_position()) != m_enemyPositions.end();
+			m_player.getPosition()) != m_enemyPositions.end();
 	}
 
 	bool isWall(Coordinate coor) const
@@ -308,7 +212,6 @@ public:
 	{
 		return m_board[coor.first][coor.second] == '.';
 	}
-
 
 /// <summary>
 /// Helper functions to generate board
@@ -492,4 +395,182 @@ private:
 		} while (!x_values.empty());
 		m_board[m_entrance.first][m_entrance.second] = '.';
 	}
+
+/// <summary>
+/// Helper functions for object movements
+/// </summary>
+private:
+	Coordinate findPath(Coordinate start, Coordinate end)
+	{
+		std::vector<std::vector<bool>> visited(m_board.size(), std::vector<bool>(m_board[0].size(), false));
+		std::vector<std::vector<Coordinate>> parent(m_board.size(), std::vector<Coordinate>(m_board[0].size()));
+
+		std::queue<Coordinate> queue;
+		queue.push(start);
+		visited[start.first][start.second] = true;
+		parent[start.first][start.second] = start;
+		//const int dx[4] = { -1, 1, 0, 0 };
+		//const int dy[4] = { 0, 0, -1, 1 };
+		const std::vector<Coordinate> directions = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} }; // Up, down, left, right
+
+		while (!queue.empty()) {
+			Coordinate current = queue.front();
+			queue.pop();
+
+			if (current == end) {
+				break;
+			}
+
+			for (const auto& dir : directions) {
+				Coordinate next = { current.first + dir.first, current.second + dir.second };
+				if (next.first < 0 || next.first >= m_board.size() || next.second < 0 || next.second >= m_board[0].size()) {
+					continue; // Out of bounds
+				}
+				if (m_board[next.first][next.second] == '#' || visited[next.first][next.second]) {
+					continue; // Wall or already visited
+				}
+				visited[next.first][next.second] = true;
+				parent[next.first][next.second] = current;
+				queue.push(next);
+			}
+		}
+
+		// Reconstruct the path
+		std::vector<Coordinate> path;
+		Coordinate current = end;
+		while (current != start) {
+			path.push_back(current);
+			current = parent[current.first][current.second];
+		}
+		path.push_back(start);
+		std::reverse(path.begin(), path.end());
+
+		return path[1];
+	}
+
+	//-------------------------FIRE---------------------------
+
+/// <summary>
+/// Chooses randomly fire's count[1-3] and put it into board
+/// </summary>
+	void generateFire()
+	{
+		// Choosing fire count randomly[1-3]
+		std::size_t fire_count;
+		fire_count = generateRandomNumber(1, 3);
+
+		// Generating random coordinates of fires and push_back-ing them into _enemy_positions
+		for (std::size_t i = 0; i < fire_count; ++i)
+		{
+			Coordinate new_coor;
+
+			// Generating new coordinates, while coordinate is a wall
+			do
+			{
+				new_coor = generateRandomCoordinate(
+					Coordinate{ 1,1 },
+					Coordinate{ m_size - 2, m_size - 2 }
+				);
+			} while (isWall(new_coor));
+
+			// Setting '@' into board
+			m_board[new_coor.first][new_coor.second] = '@';
+
+			m_enemyPositions.push_back(new_coor);
+		}
+	}
+
+	/// <summary>
+	/// Spread fire to empty neighbouring cells
+	/// </summary>
+	void spreadFire()
+	{
+		// Vector for neighbouring empty cells of already existing fire cells
+		std::vector<Coordinate> newFirePositions;
+
+		// Traversing on already existing fire cells
+		for (const auto& firePosition : m_enemyPositions)
+		{
+			// Finding and filling vector by neighbouring cells of current cell
+			auto neighbors = getNeighbouringCoordinates(firePosition);
+
+			// Checking, if neighbour cell is a wall or its another fire, we dont push into newFirePositions
+			for (const auto& neighbor : neighbors)
+			{
+				// Checking statement
+				if (!isWall(neighbor) && m_board[neighbor.first][neighbor.second] != '@')
+				{
+					newFirePositions.push_back(neighbor);
+					m_board[neighbor.first][neighbor.second] = '@';
+				}
+			}
+		}
+
+		// Adding new fire positions into _enemy_positions
+		m_enemyPositions.insert(m_enemyPositions.end(), newFirePositions.begin(), newFirePositions.end());
+	}
+	//-------------------------FIRE---------------------------
+
+	//-------------------------ALIEN--------------------------
+
+	/// <summary>
+	/// Chooses randomly aliens's count(3-5) and put it into board
+	/// </summary>
+	void generateAliens()
+	{
+		// Choosing fire count randomly[3-5]
+		std::size_t alien_count;
+		alien_count = generateRandomNumber(3, 5);
+
+		// Generating random coordinates of aliens and push_back-ing them into _enemy_positions
+		for (std::size_t i = 0; i < alien_count; ++i)
+		{
+			Coordinate new_coor;
+
+			// Generating new coordinates, while coordinate is a wall
+			do
+			{
+				new_coor = generateRandomCoordinate(
+					Coordinate{ 1,1 },
+					Coordinate{ m_size - 2, m_size - 2 });
+			} while (isWall(new_coor));
+
+			// Setting '&' into board
+			m_board[new_coor.first][new_coor.second] = '&';
+
+			m_enemyPositions.push_back(new_coor);
+		}
+	}
+
+	void moveAliens()
+	{
+		for (std::size_t i = 0; i < m_enemyPositions.size(); ++i)
+		{
+
+			Coordinate newPosition = findPath(m_enemyPositions[i], m_player.getPosition());
+			m_board[m_enemyPositions[i].first][m_enemyPositions[i].second] = '.';
+			m_board[newPosition.first][newPosition.second] = '&';
+			m_enemyPositions[i] = newPosition;
+		}
+	}
+	//-------------------------ALIEN--------------------------
+
+	//-------------------------PLAYER--------------------------
+
+	/// <summary>
+	/// Puts player on the start-entrance cell
+	/// </summary>
+	void putPlayerIntoBoard()
+	{
+		m_board[m_entrance.first][m_entrance.second] = '±';
+	}
+
+	/// <summary>
+	/// Updates player's position on the board
+	/// </summary>
+	void updatePlayerPosition()
+	{
+		m_board[m_player.getPosition().first][m_player.getPosition().second] = '±';
+	}
+	//-------------------------PLAYER--------------------------
 };

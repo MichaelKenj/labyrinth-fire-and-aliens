@@ -31,18 +31,18 @@ public:
 	/// Gives player's current position
 	/// </summary>
 	/// <returns></returns>
-	Coordinate get_position() const 
+	Coordinate getPosition() const 
 	{
 		return m_position;
 	}
 
-	bool is_alive() const
+	bool isAlive() const
 	{
 		return m_isAlive;
 	}
 
 	// Is this useless?
-	void kill_player()
+	void killPlayer()
 	{
 		m_isAlive = false;
 	}
