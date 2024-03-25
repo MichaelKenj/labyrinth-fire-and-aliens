@@ -174,18 +174,17 @@ public:
 
 	bool isWinable() const
 	{
-		// TODO
-		// Implement additional function, which solves maze
+		// Should call solve() and if vector is not empty -> its winable
 	}
 
-	bool isSolvableIn5Moves() const
+	bool isSolvableAtLeastIn5Moves() const
 	{
-
+		// Should call solve() and if vector.size() >= 5 -> its solvable in 5 moves
 	}
 
 	bool isValid() const
 	{
-		if(isWinable() && isSolvableIn5Moves())
+		if(isWinable() && isSolvableAtLeastIn5Moves())
 			return true;
 		return false;
 	}
@@ -211,6 +210,19 @@ public:
 	bool isEmptySpace(Coordinate coor) const
 	{
 		return m_board[coor.first][coor.second] == '.';
+	}
+
+/// <summary>
+/// Functions which solves maze
+/// </summary>
+private:
+	/// <summary>
+	/// Solving maze. If vector is empty => Maze is not solvable
+	/// </summary>
+	/// <returns>Vector of coordinates of winning path</returns>
+	std::vector< Coordinate > solve()
+	{
+
 	}
 
 /// <summary>
@@ -451,7 +463,7 @@ private:
 	//-------------------------FIRE---------------------------
 
 /// <summary>
-/// Chooses randomly fire's count[1-3] and put it into board
+/// Chooses randomly fire's count[1-3] and puts them into board
 /// </summary>
 	void generateFire()
 	{
@@ -514,7 +526,7 @@ private:
 	//-------------------------ALIEN--------------------------
 
 	/// <summary>
-	/// Chooses randomly aliens's count(3-5) and put it into board
+	/// Chooses randomly aliens's count(3-5) and puts them into board
 	/// </summary>
 	void generateAliens()
 	{
