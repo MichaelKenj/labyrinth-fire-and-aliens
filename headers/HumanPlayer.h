@@ -47,5 +47,3 @@ public:
 		m_isAlive = false;
 	}
 };
-
-
