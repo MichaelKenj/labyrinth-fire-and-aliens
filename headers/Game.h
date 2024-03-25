@@ -18,7 +18,7 @@ public:
 		gameModeSetter();
 		
 		/// Generating labyrinth based on game mode
-		// Should be is while loop (!isValid())
+		// Should be in while loop (!isValid())
 		m_labyrinth = Labyrinth(m_gameMode);
 
 		/// Clearing menu to start the gameplay
