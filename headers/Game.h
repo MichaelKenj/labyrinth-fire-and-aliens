@@ -12,17 +12,17 @@ public:
 	Game()
 	{
 		// TODO
-		// Here should be generated labyrinth
 		// Generate new maze while its not valid
 
 		/// Here user choose _game_mode
 		gameModeSetter();
+		
+		/// Generating labyrinth based on game mode
+		// Should be in while loop (!isValid())
+		m_labyrinth = Labyrinth(m_gameMode);
 
 		/// Clearing menu to start the gameplay
 		system("cls");
-
-		/// Generating labyrinth based on game mode
-		m_labyrinth = Labyrinth(m_gameMode);
 	}
 
 	/// <summary>
@@ -32,7 +32,7 @@ public:
 	{
 		// TODO
 		// Implement here game logic
-		while (true)
+		while (true)// here should be isAlive player()
 		{
 			m_labyrinth.printBoard();
 			bool isPlayerMoved;
