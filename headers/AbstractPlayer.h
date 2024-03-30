@@ -38,12 +38,12 @@ Coordinate  generateRandomCoordinate(Coordinate coor1, Coordinate coor2)
 	return new_coor;
 }
 
-class Abstract_Player
+class AbstractPlayer
 {
 private:
 	Coordinate m_position;
 public:
-	virtual ~Abstract_Player() {}
+	virtual ~AbstractPlayer() {}
 
 	virtual void move() = 0;
 

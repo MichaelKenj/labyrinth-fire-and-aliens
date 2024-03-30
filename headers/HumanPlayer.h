@@ -1,7 +1,7 @@
 #pragma once
-#include "Abstract_Player.h"
+#include "AbstractPlayer.h"
 
-class Human_Player final : public Abstract_Player
+class Human_Player final : public AbstractPlayer
 {
 private:
 	Coordinate m_position;

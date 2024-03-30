@@ -131,7 +131,10 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="headers\Abstract_Player.h" />
+    <ClInclude Include="AbstractLabyrinth.h" />
+    <ClInclude Include="AlienLabyrinth.h" />
+    <ClInclude Include="FireLabyrinth.h" />
+    <ClInclude Include="headers\AbstractPlayer.h" />
     <ClInclude Include="headers\AlienPlayer.h" />
     <ClInclude Include="headers\Game.h" />
     <ClInclude Include="headers\Game_Mode.h" />
