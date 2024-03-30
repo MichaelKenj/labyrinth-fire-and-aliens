@@ -1,6 +1,6 @@
 #pragma once
 
-enum GAME_MODE
+enum class GAME_MODE
 {
 	FIRE,
 	ALIEN
