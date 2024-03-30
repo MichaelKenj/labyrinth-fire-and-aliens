@@ -29,7 +29,7 @@ enum DIRECTION
 
 class AbstractLabyrinth
 {
-private:
+protected:
 	/// Maze
 	Board m_board;
 
