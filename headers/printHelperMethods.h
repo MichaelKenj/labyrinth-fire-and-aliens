@@ -7,6 +7,7 @@
 #include <windows.h>  
 #include <time.h>  
 #include <limits>
+#include <iostream>
 #include "Game_Mode.h"
 
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);

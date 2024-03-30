@@ -2,6 +2,7 @@
 #include "AlienPlayer.h"
 #include "Labyrinth.h"
 #include "printHelperMethods.h"
+#include "Game_Mode.h"
 
 class Game
 {

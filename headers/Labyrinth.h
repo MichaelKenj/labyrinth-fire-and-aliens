@@ -8,8 +8,8 @@
 #include <algorithm>
 #include <windows.h>
 #include "HumanPlayer.h"
-#include "Game_Mode.h"
 #include "printHelperMethods.h"
+#include "Game_Mode.h"
 
 /// <summary>
 /// TODO
