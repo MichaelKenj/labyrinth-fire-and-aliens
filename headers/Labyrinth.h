@@ -10,6 +10,11 @@
 #include "HumanPlayer.h"
 #include "Game_Mode.h"
 
+/// <summary>
+/// TODO
+/// Separate Labirynth class into 2 class depends on game_mode
+/// </summary>
+
 using Board = std::vector<std::vector<char>>;
 
 enum DIRECTION
