@@ -79,13 +79,13 @@ public:
 			generateAliens();
 		}
 		m_player.setPosition(m_entrance);
-		putPlayerIntoBoard();		
+		putPlayerIntoBoard();
 	}
 
 	/// <summary>
 	/// Prints board. Prints aliens as green, fire as red, player as blue
 	/// </summary>
-	void printBoard() const 
+	void printBoard() const
 	{
 		for (const auto& row : m_board) 
 		{
@@ -479,7 +479,8 @@ private:
 			for (std::size_t i = 0; i < 4; ++i)
 			{
 				Coordinate next = { current.first + dx[i], current.second + dy[i]};
-				if (next.first < 0 || next.first >= m_board.size() || next.second < 0 || next.second >= m_board[0].size()) {
+				if (next.first < 0 || next.first >= m_board.size() || next.second < 0 || next.second >= m_board[0].size()) 
+				{
 					continue; // Out of bounds
 				}
 				if (m_board[next.first][next.second] == '#' || visited[next.first][next.second]) {

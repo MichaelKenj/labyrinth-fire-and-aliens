@@ -33,10 +33,12 @@ public:
 		// TODO
 		// Implement here game logic
 
+		// check is player alive in Player
 		// Put this while into separate function later
 		while (m_labyrinth.isPlayerAlive() && !m_labyrinth.isMazeSolved())// here should be isAlive player()
 		{
 			m_labyrinth.printBoard();
+			// move move logic into separate function
 			bool isPlayerMoved = false;
 			char press = _getche();
 			switch (press)
