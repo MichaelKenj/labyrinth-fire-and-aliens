@@ -118,6 +118,7 @@ public:
 	/// Helper functions to generate board
 	/// </summary>
 private:
+	// qcenq arandzin file mej
 	Coordinate generateStartForGenerating(const Coordinate entrance) const
 	{
 		if (entrance.first != 0 && entrance.first != m_size - 1)
