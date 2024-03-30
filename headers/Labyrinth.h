@@ -13,6 +13,7 @@
 /// <summary>
 /// TODO
 /// Separate Labirynth class into 2 class depends on game_mode
+/// do bfs from player(not from aliens
 /// </summary>
 
 using Board = std::vector<std::vector<char>>;
