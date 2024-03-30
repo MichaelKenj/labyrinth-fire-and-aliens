@@ -32,10 +32,14 @@ public:
 	{
 		// TODO
 		// Implement here game logic
-		while (true)// here should be isAlive player()
+
+		// check is player alive in Player
+		// Put this while into separate function later
+		while (m_labyrinth.isPlayerAlive() && !m_labyrinth.isMazeSolved())// here should be isAlive player()
 		{
 			m_labyrinth.printBoard();
-			bool isPlayerMoved;
+			// move move logic into separate function
+			bool isPlayerMoved = false;
 			char press = _getche();
 			switch (press)
 			{
@@ -56,6 +60,19 @@ public:
 				m_labyrinth.moveEnemies(m_gameMode);
 			system("cls");	
 		}
+
+		/// Indicate if the game is lost or won
+		if (m_labyrinth.isPlayerAlive())
+		{
+			//win() function
+			std::cout << "WON\n";
+		}
+		else
+		{
+			stop();
+			//std::cout << "LOSE\n";
+		}
+
 	}
 
 	/// <summary>
@@ -67,11 +84,13 @@ public:
 		return m_labyrinth;
 	}
 private:
+	// Game over print
 	void stop()
 	{
 		// TODO
 		// This function should be called in play(), if player loses. Should print GAME OVER, and stop all
 		// processes in play() 
+		slideGameOver();
 	}
 
 	/// <summary>

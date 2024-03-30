@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <chrono>
 #include <thread>
 #include <Windows.h>
@@ -56,3 +56,61 @@ void printChooseGameModeFrame()
 	goToXY(10, 11); std::cout << "3. Back to main menu";
 	goToXY(10, 12); std::cout << "Select option: ";
 }
+
+void printCoordinate(Coordinate cord)
+{
+	std::cout << "(" << cord.first << "," << cord.second << ")\n";
+}
+
+///-----------PRINT FRAMES OF TITLES------------
+
+// _hell is a vector of rows of big title
+void printFrame(const std::vector<std::string>& _hell)
+{
+    std::cout << "\n\n\n\n\n\n\n\n\n\n";
+    for (int i = 0; i < _hell.size(); ++i)
+    {
+        std::cout << _hell[i] << '\n';
+    }
+
+}
+///-----------FOR HELLO------------
+
+// Sliding Hello
+void slideGameOver()
+{  
+    std::string row1 = "    ±±±±  ±±±  ±   ± ±±±±±       ±±±  ±   ± ±±±±± ±±±± ";
+    std::string row2 = "   ±     ±   ± ±± ±± ±          ±   ± ±   ± ±     ±   ±";
+    std::string row3 = "   ±  ±± ±±±±± ± ± ± ±±±±       ±   ±  ± ±  ±±±±  ±±±± ";
+    std::string row4 = "   ±   ± ±   ± ±   ± ±          ±   ±  ± ±  ±     ±   ±";
+    std::string row5 = "   ±±±±  ±   ± ±   ± ±±±±±       ±±±    ±   ±±±±± ±   ±";
+    std::vector<std::string> _hello{ row1, row2, row3, row4, row5};
+    int spaces = 24;
+
+    std::string sps = "";
+    for (int i = 0; i < 50; ++i)
+        sps += " ";
+    for (std::size_t i = 0; i < _hello.size(); ++i)
+    {
+        _hello[i] = sps + _hello[i];
+    }
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+    while (spaces >= 0)
+    {
+        printFrame(_hello);
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+
+        --spaces;
+        if (spaces == 0)
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+        system("cls");
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0,0 });
+        for (std::size_t i = 0; i < _hello.size(); ++i)
+        {
+            _hello[i].erase(0, 1);
+        }
+    }
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+}
+///-----------FOR MENU-------------

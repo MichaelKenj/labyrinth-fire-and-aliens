@@ -9,6 +9,7 @@
 #include <windows.h>
 #include "HumanPlayer.h"
 #include "Game_Mode.h"
+#include "printHelperMethods.h"
 
 /// <summary>
 /// TODO
@@ -44,29 +45,20 @@ private:
 
 	/// Coordinates of entrance in the maze
 	Coordinate m_entrance;
+	
+	/// Coordinates of exits in the maze
+	Coordinate m_exit1;
+	Coordinate m_exit2;
 
 	/// Contains coordinates of enemy object(Fire or Aliens) in the maze
 	std::vector < Coordinate > m_enemyPositions;
 public:
 	/// <summary>
-	/// Also default constructor, generates square maze depends on size of edge, and puts player on the entrance cell
-	/// </summary>
-	/// <param name="_size"></param>
-	Labyrinth(std::size_t size = 20) : m_size(size)
-	{
-		m_board.assign(size, std::vector<char>(size, '#'));
-        generateEntrance();
-		generateBoard();
-		m_player.setPosition(m_entrance);
-		putPlayerIntoBoard();
-	}
-
-	/// <summary>
 	/// Generates square maze, depends on GAME_MODE, generates fire or aliens, and puts player on entrance cell
 	/// </summary>
 	/// <param name="flag"></param>
 	/// <param name="size"></param>
-	Labyrinth(GAME_MODE flag, std::size_t size = 20) 
+	Labyrinth(GAME_MODE flag = FIRE, std::size_t size = 20) 
 		: m_size(size)
 	{
 		// Filling board with '#'
@@ -77,6 +69,11 @@ public:
 
 		// Generating maze
 		generateBoard();
+		
+		do
+		{
+			generateFirstExit();
+		} while (isWall(generateStartForGenerating(m_exit1)));
 
 		// Generating objects based on GAME_MODE
 		if (flag == FIRE)
@@ -94,7 +91,7 @@ public:
 	/// <summary>
 	/// Prints board. Prints aliens as green, fire as red, player as blue
 	/// </summary>
-	void printBoard() const 
+	void printBoard() const
 	{
 		for (const auto& row : m_board) 
 		{
@@ -218,6 +215,15 @@ public:
 		return m_board[coor.first][coor.second] == '.';
 	}
 
+	bool isPlayerAlive() const
+	{
+		return !isPlayerCaughtByAlien() && !isPlayerOnFire();
+	}
+
+	bool isMazeSolved() const
+	{
+		return m_player.getPosition() == m_exit1 || m_player.getPosition() == m_exit2;
+	}
 /// <summary>
 /// Functions which solves maze
 /// </summary>
@@ -316,6 +322,7 @@ private:
 		return false;
 	}
 
+	// change to enum
 	void generateEntrance()
 	{
 		std::size_t side = generateRandomNumber(0, 3);
@@ -343,6 +350,45 @@ private:
 		auto entrance = std::make_pair(entrance_x, entrance_y);
 		m_entrance = entrance;
 
+	}
+
+	void generateSecondExit()
+	{
+
+	}
+
+	void generateFirstExit()
+	{
+		// TODO
+		// change exit char
+		//std::size_t exit_count = generateRandomNumber(1, 2);
+		DIRECTION side = static_cast<DIRECTION>(generateRandomNumber(0, 3));
+		std::size_t exit_x;
+		std::size_t exit_y;
+		switch (side)
+		{
+		case UP:
+			exit_x = 0;
+			exit_y = generateRandomNumber(1, m_size - 2);
+			break;
+		case DOWN:
+			exit_x = m_size - 1;
+			exit_y = generateRandomNumber(1, m_size - 2);
+			break;
+		case LEFT:
+			exit_x = generateRandomNumber(1, m_size - 2);
+			exit_y = 0;
+			
+			break;
+		case RIGHT:
+			
+			exit_x = generateRandomNumber(1, m_size - 2);
+			exit_y = m_size - 1;
+			break;
+		}
+		auto exit = std::make_pair(exit_x, exit_y);
+		m_exit1 = exit;
+		m_board[m_exit1.first][m_exit1.second] = 'E';
 	}
 
 	void generateBoard()
@@ -427,9 +473,6 @@ private:
 		queue.push(start);
 		visited[start.first][start.second] = true;
 		parent[start.first][start.second] = start;
-		//const int dx[4] = { -1, 1, 0, 0 };
-		//const int dy[4] = { 0, 0, -1, 1 };
-		const std::vector<Coordinate> directions = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} }; // Up, down, left, right
 
 		while (!queue.empty()) {
 			Coordinate current = queue.front();
@@ -439,9 +482,11 @@ private:
 				break;
 			}
 
-			for (const auto& dir : directions) {
-				Coordinate next = { current.first + dir.first, current.second + dir.second };
-				if (next.first < 0 || next.first >= m_board.size() || next.second < 0 || next.second >= m_board[0].size()) {
+			for (std::size_t i = 0; i < 4; ++i)
+			{
+				Coordinate next = { current.first + dx[i], current.second + dy[i]};
+				if (next.first < 0 || next.first >= m_board.size() || next.second < 0 || next.second >= m_board[0].size()) 
+				{
 					continue; // Out of bounds
 				}
 				if (m_board[next.first][next.second] == '#' || visited[next.first][next.second]) {
@@ -462,7 +507,6 @@ private:
 		}
 		path.push_back(start);
 		std::reverse(path.begin(), path.end());
-
 		return path[1];
 	}
 
@@ -562,9 +606,11 @@ private:
 
 	void moveAliens()
 	{
+		if (isPlayerCaughtByAlien())
+			return;
+
 		for (std::size_t i = 0; i < m_enemyPositions.size(); ++i)
 		{
-
 			Coordinate newPosition = findPath(m_enemyPositions[i], m_player.getPosition());
 			m_board[m_enemyPositions[i].first][m_enemyPositions[i].second] = '.';
 			m_board[newPosition.first][newPosition.second] = '&';
