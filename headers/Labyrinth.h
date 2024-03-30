@@ -10,22 +10,7 @@
 #include "HumanPlayer.h"
 #include "printHelperMethods.h"
 #include "Game_Mode.h"
-
-/// <summary>
-/// TODO
-/// Separate Labirynth class into 2 class depends on game_mode
-/// do bfs from player(not from aliens
-/// </summary>
-
-using Board = std::vector<std::vector<char>>;
-
-enum DIRECTION
-{
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT
-};
+#include "AbstractLabyrinth.h"
 
 //                 UP, DOWN, LEFT, RIGHT
 const int dx[4] = { -1, 1, 0, 0 };
@@ -88,37 +73,7 @@ public:
 		putPlayerIntoBoard();
 	}
 
-	/// <summary>
-	/// Prints board. Prints aliens as green, fire as red, player as blue
-	/// </summary>
-	void printBoard() const
-	{
-		for (const auto& row : m_board) 
-		{
-			for (char cell : row)
-			{
-				if (cell == '@')
-				{
-					// Setting color red, if cell is fire
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
-				}
-				else if (cell == '&')
-				{
-					// Setting color green, if cell is alien
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-				}
-				else if (cell == '±')
-				{
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
-				}
-				std::cout <<std::setw(2) << cell;
-
-				// Setting back white color of console
-				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-			}
-			std::cout << std::endl;
-		}
-	}
+	
 	//----------HUMAN_PLAYER-------------
 
 	/// <summary>
@@ -192,11 +147,13 @@ public:
 		return false;
 	}
 
+	// P isPlayerCaughtByEnemy()
 	bool isPlayerOnFire() const 
 	{
 		return m_board[m_player.getPosition().first][m_player.getPosition().second] == '@';
 	}
 
+	// P isPlayerCaughtByEnemy()
 	bool isPlayerCaughtByAlien() const 
 	{
 		return std::find(
@@ -205,21 +162,19 @@ public:
 			m_player.getPosition()) != m_enemyPositions.end();
 	}
 
+	// A
 	bool isWall(Coordinate coor) const
 	{
 		return m_board[coor.first][coor.second] == '#';
 	}
 
+	// A
 	bool isEmptySpace(Coordinate coor) const
 	{
 		return m_board[coor.first][coor.second] == '.';
 	}
 
-	bool isPlayerAlive() const
-	{
-		return !isPlayerCaughtByAlien() && !isPlayerOnFire();
-	}
-
+	// G
 	bool isMazeSolved() const
 	{
 		return m_player.getPosition() == m_exit1 || m_player.getPosition() == m_exit2;
@@ -231,7 +186,7 @@ private:
 	/// <summary>
 	/// Solving maze. If vector is empty => Maze is not solvable
 	/// </summary>
-	/// <returns>Vector of coordinates of winning path</returns>
+	/// <returns>Vector of coordinates of winning path</returns> 
 	std::vector< Coordinate > solve()
 	{
 
@@ -515,6 +470,7 @@ private:
 /// <summary>
 /// Chooses randomly fire's count[1-3] and puts them into board
 /// </summary>
+/// 	FireLab
 	void generateFire()
 	{
 		// Choosing fire count randomly[1-3]
@@ -545,6 +501,7 @@ private:
 	/// <summary>
 	/// Spread fire to empty neighbouring cells
 	/// </summary>
+	// FireLab
 	void spreadFire()
 	{
 		// Vector for neighbouring empty cells of already existing fire cells
@@ -578,6 +535,7 @@ private:
 	/// <summary>
 	/// Chooses randomly aliens's count(3-5) and puts them into board
 	/// </summary>
+	// AlLab
 	void generateAliens()
 	{
 		// Choosing fire count randomly[3-5]
@@ -604,6 +562,7 @@ private:
 		}
 	}
 
+	// Alien
 	void moveAliens()
 	{
 		if (isPlayerCaughtByAlien())
@@ -624,6 +583,7 @@ private:
 	/// <summary>
 	/// Puts player on the start-entrance cell
 	/// </summary>
+	
 	void putPlayerIntoBoard()
 	{
 		m_board[m_entrance.first][m_entrance.second] = '±';
