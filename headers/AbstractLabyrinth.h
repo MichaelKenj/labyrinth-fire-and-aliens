@@ -13,9 +13,12 @@
 
 /// <summary>
 /// TODO
-/// Separate Labirynth class into 2 class depends on game_mode
 /// do bfs from player(not from aliens
 /// </summary>
+
+//                 UP, DOWN, LEFT, RIGHT
+const int dx[4] = { -1, 1, 0, 0 };
+const int dy[4] = { 0, 0, -1, 1 };
 
 using Board = std::vector<std::vector<char>>;
 
@@ -30,6 +33,7 @@ enum DIRECTION
 class AbstractLabyrinth
 {
 protected:
+	Human_Player m_player;
 	/// Maze
 	Board m_board;
 
@@ -42,11 +46,12 @@ protected:
 	/// Coordinates of exits in the maze
 	Coordinate m_exit1;
 	Coordinate m_exit2;
-
 public:
-	virtual [[nodiscard]] void solve() const noexcept = 0;
-	virtual [[nodiscard]] void moveEnemies() noexcept = 0;
-	virtual [[nodiscard]] void generateEnemy() noexcept = 0;
+	//virtual void solve() const noexcept = 0;
+	virtual void moveEnemies() noexcept = 0;
+	virtual void generateEnemy() noexcept = 0;
+	// HumanPlayer.h
+	virtual bool isPlayerCaughtByEnemy() const = 0;
 public:
 	/// <summary>
 	/// Generates square maze, depends on GAME_MODE, generates fire or aliens, and puts player on entrance cell
@@ -65,6 +70,9 @@ public:
 		// Generating maze
 		generateBoard();
 
+		m_player.setPosition(m_entrance);
+		putPlayerIntoBoard();
+
 		do
 		{
 			generateFirstExit();
@@ -72,9 +80,45 @@ public:
 
 	}
 
-	/// <summary>
-	/// Prints board. Prints aliens as green, fire as red, player as blue
-	/// </summary>
+	//----------HUMAN_PLAYER-------------
+	bool movePlayer(DIRECTION direction)
+	{
+		//                 UP, DOWN, LEFT, RIGHT
+		//const int dx[4] = { -1, 1, 0, 0 };
+		//const int dy[4] = { 0, 0, -1, 1 };
+		Coordinate prevCoordinate = m_player.getPosition();
+		Coordinate newPossibleCoordinate;
+		newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[0], m_player.getPosition().second + dy[0] };
+
+		switch (direction)
+		{
+		case UP:
+			break;
+			// -1 0
+		case DOWN:
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[1], m_player.getPosition().second + dy[1] };
+			break;
+			// +1 0
+		case LEFT:
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[2], m_player.getPosition().second + dy[2] };
+			break;
+			// 0 -1
+		case RIGHT:
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[3], m_player.getPosition().second + dy[3] };
+			break;
+			// 0 +1
+		}
+		if (!isWall(newPossibleCoordinate))
+		{
+			m_player.setPosition(newPossibleCoordinate);
+			updatePlayerPosition();
+			m_board[prevCoordinate.first][prevCoordinate.second] = '.';
+			return true;
+		}
+		return false;
+	}
+	//----------HUMAN_PLAYER-------------
+
 	void printBoard() const
 	{
 		for (const auto& row : m_board)
@@ -114,10 +158,66 @@ public:
 		return m_board[coor.first][coor.second] == '.';
 	}
 
+	// Game.h
+	bool isWinable() const
+	{
+		// Should call solve() and if vector is not empty -> its winable
+	}
+
+	// Game.h
+	bool isSolvableAtLeastIn5Moves() const
+	{
+		// Should call solve() and if vector.size() >= 5 -> its solvable in 5 moves
+	}
+
+	// Game.h
+	bool isValid() const
+	{
+		if (isWinable() && isSolvableAtLeastIn5Moves())
+			return true;
+		return false;
+	}
+
+	// HumanPlayer.h
+	bool isPlayerAlive() const
+	{
+		return m_player.isAlive();
+	}
+
+	void putPlayerIntoBoard()
+	{
+		m_board[m_entrance.first][m_entrance.second] = '±';
+	}
+
+	// Game.h
+	bool isMazeSolved() const
+	{
+		return m_player.getPosition() == m_exit1 || m_player.getPosition() == m_exit2;
+	}
+/// <summary>
+/// Functions which solves maze
+/// </summary>
+protected:
+	/// <summary>
+	/// Solving maze. If vector is empty => Maze is not solvable
+	/// </summary>
+	/// <returns>Vector of coordinates of winning path</returns> 
+	// Game.h
+	std::vector< Coordinate > solve()
+	{
+
+	}
+
+	// Game.h
+	void updatePlayerPosition()
+	{
+		m_board[m_player.getPosition().first][m_player.getPosition().second] = '±';
+	}
+	
 	/// <summary>
 	/// Helper functions to generate board
 	/// </summary>
-private:
+protected:
 	// qcenq arandzin file mej
 	Coordinate generateStartForGenerating(const Coordinate entrance) const
 	{
@@ -133,6 +233,7 @@ private:
 		}
 	}
 
+	// qcenq arandzin file mej
 	std::vector<Coordinate> getNeighbouringCoordinates(const Coordinate coor)
 	{
 		std::vector<Coordinate> res_vec;
@@ -152,6 +253,7 @@ private:
 		return res_vec;
 	}
 
+	// qcenq arandzin file mej
 	std::size_t moveLeftOrRight(int direction, int x) const
 	{
 		if (direction == RIGHT)
@@ -162,6 +264,7 @@ private:
 			return x;
 	}
 
+	// qcenq arandzin file mej
 	std::size_t moveUpOrDown(int direction, int y) const
 	{
 		if (direction == UP)
@@ -172,28 +275,29 @@ private:
 			return y;
 	}
 
-	bool isGoodMove(int x, int y, int direction, const Board& grid) const
+	// qcenq arandzin file mej
+	bool isGoodMove(int x, int y, int direction) const
 	{
 		x = moveLeftOrRight(direction, x);
 		y = moveUpOrDown(direction, y);
 
-		if (grid[y][x] == '.' || x >= (m_size - 1) || x <= 0 || y <= 0 || y >= (m_size - 1))
+		if (m_board[y][x] == '.' || x >= (m_size - 1) || x <= 0 || y <= 0 || y >= (m_size - 1))
 			return false;
 		if (direction == UP) {
-			if (grid[y][x - 1] != '.' && grid[y - 1][x] != '.' && grid[y][x + 1] != '.' && grid[y - 1][x - 1] != '.' && grid[y - 1][x + 1] != '.')
+			if (m_board[y][x - 1] != '.' && m_board[y - 1][x] != '.' && m_board[y][x + 1] != '.' && m_board[y - 1][x - 1] != '.' && m_board[y - 1][x + 1] != '.')
 				return true;
 		}
 		if (direction == DOWN) {
-			if (grid[y][x - 1] != '.' && grid[y + 1][x] != '.' && grid[y][x + 1] != '.' && grid[y + 1][x - 1] != '.' && grid[y + 1][x + 1] != '.')
+			if (m_board[y][x - 1] != '.' && m_board[y + 1][x] != '.' && m_board[y][x + 1] != '.' && m_board[y + 1][x - 1] != '.' && m_board[y + 1][x + 1] != '.')
 				return true;
 		}
 		if (direction == RIGHT) {
-			if (grid[y][x + 1] != '.' && grid[y - 1][x] != '.' && grid[y + 1][x] != '.' && grid[y - 1][x + 1] != '.' && grid[y + 1][x + 1] != '.') {
+			if (m_board[y][x + 1] != '.' && m_board[y - 1][x] != '.' && m_board[y + 1][x] != '.' && m_board[y - 1][x + 1] != '.' && m_board[y + 1][x + 1] != '.') {
 				return true;
 			}
 		}
 		if (direction == LEFT) {
-			if (grid[y][x - 1] != '.' && grid[y - 1][x] != '.' && grid[y + 1][x] != '.' && grid[y - 1][x - 1] != '.' && grid[y + 1][x - 1] != '.') {
+			if (m_board[y][x - 1] != '.' && m_board[y - 1][x] != '.' && m_board[y + 1][x] != '.' && m_board[y - 1][x - 1] != '.' && m_board[y + 1][x - 1] != '.') {
 				return true;
 			}
 		}
@@ -292,20 +396,20 @@ private:
 			//find n good moves
 			for (std::size_t i = 0; i < 4; ++i)
 			{
-				if (isGoodMove(loc_x, loc_y, i, m_board))
+				if (isGoodMove(loc_x, loc_y, i))
 					++good_move_counter;
 			}
 
 			// if only 1 good move, move there
 			if (good_move_counter == 1)
 			{
-				if (isGoodMove(loc_x, loc_y, UP, m_board))
+				if (isGoodMove(loc_x, loc_y, UP))
 					loc_y = moveUpOrDown(UP, loc_y);
-				else if (isGoodMove(loc_x, loc_y, DOWN, m_board))
+				else if (isGoodMove(loc_x, loc_y, DOWN))
 					loc_y = moveUpOrDown(DOWN, loc_y);
-				else if (isGoodMove(loc_x, loc_y, RIGHT, m_board))
+				else if (isGoodMove(loc_x, loc_y, RIGHT))
 					loc_x = moveLeftOrRight(RIGHT, loc_x);
-				else if (isGoodMove(loc_x, loc_y, LEFT, m_board))
+				else if (isGoodMove(loc_x, loc_y, LEFT))
 					loc_x = moveLeftOrRight(LEFT, loc_x);
 			}
 
@@ -326,7 +430,7 @@ private:
 				do
 				{
 					direction = rand() % 4;
-				} while (!isGoodMove(loc_x, loc_y, direction, m_board));
+				} while (!isGoodMove(loc_x, loc_y, direction));
 
 				loc_x = moveLeftOrRight(direction, loc_x);
 				loc_y = moveUpOrDown(direction, loc_y);
