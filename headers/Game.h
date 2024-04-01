@@ -1,13 +1,27 @@
 #pragma once
 #include "AlienPlayer.h"
-#include "Labyrinth.h"
+#include "AbstractLabyrinth.h"
+#include "FireLabyrinth.h"
+#include "AlienLabyrinth.h"
 #include "printHelperMethods.h"
 #include "Game_Mode.h"
 
 class Game
 {
 private:
-	Labyrinth m_labyrinth;
+	void createLabyrinth() {
+		if (m_gameMode == FIRE) {
+			m_labyrinth = new FireLabyrinth();
+		}
+		else if (m_gameMode == ALIEN) {
+			m_labyrinth = new AlienLabyrinth();
+		}
+	}
+
+private:
+	// Change to smart pointer later
+	AbstractLabyrinth* m_labyrinth;
+	//Human_Player m_player;
 	GAME_MODE m_gameMode;
 public:
 	Game()
@@ -20,10 +34,13 @@ public:
 		
 		/// Generating labyrinth based on game mode
 		// Should be in while loop (!isValid())
-		m_labyrinth = Labyrinth(m_gameMode);
+		createLabyrinth();
 
 		/// Clearing menu to start the gameplay
 		system("cls");
+	}
+	~Game() {
+		delete m_labyrinth; // Ensure proper cleanup
 	}
 
 	/// <summary>
@@ -36,34 +53,35 @@ public:
 
 		// check is player alive in Player
 		// Put this while into separate function later
-		while (m_labyrinth.isPlayerAlive() && !m_labyrinth.isMazeSolved())// here should be isAlive player()
+		// m_labyrinth -> isPlayerCaughtByEnemy() && ! m_labyrinth -> isMazeSolved() this is while loop condition
+		while (m_labyrinth-> isPlayerAlive() && !m_labyrinth->isMazeSolved())// here should be isAlive player()
 		{
-			m_labyrinth.printBoard();
+			m_labyrinth -> printBoard();
 			// move move logic into separate function
 			bool isPlayerMoved = false;
 			char press = _getche();
 			switch (press)
 			{
 			case 'w':
-				isPlayerMoved = m_labyrinth.movePlayer(UP);
+				isPlayerMoved = m_labyrinth -> movePlayer(UP);
 				break;
 			case 'd':
-				isPlayerMoved = m_labyrinth.movePlayer(RIGHT);
+				isPlayerMoved = m_labyrinth->movePlayer(RIGHT);
 				break;
 			case 's':
-				isPlayerMoved = m_labyrinth.movePlayer(DOWN);
+				isPlayerMoved = m_labyrinth->movePlayer(DOWN);
 				break;
 			case 'a':
-				isPlayerMoved = m_labyrinth.movePlayer(LEFT);
+				isPlayerMoved = m_labyrinth->movePlayer(LEFT);
 				break;
 			}
 			if(isPlayerMoved)
-				m_labyrinth.moveEnemies(m_gameMode);
+				m_labyrinth->moveEnemies();
 			system("cls");	
 		}
 
 		/// Indicate if the game is lost or won
-		if (m_labyrinth.isPlayerAlive())
+		if (m_labyrinth ->isPlayerAlive())
 		{
 			//win() function
 			std::cout << "WON\n";
@@ -73,16 +91,6 @@ public:
 			stop();
 			//std::cout << "LOSE\n";
 		}
-
-	}
-
-	/// <summary>
-	/// Temprorary function, should be removed in the end
-	/// </summary>
-	/// <returns></returns>
-	Labyrinth getLabyrinth()
-	{
-		return m_labyrinth;
 	}
 private:
 	// Game over print
