@@ -108,12 +108,15 @@ public:
 			break;
 			// 0 +1
 		}
-		if (!isWall(newPossibleCoordinate))
+		if (isValidCoord(newPossibleCoordinate))
 		{
-			m_player.setPosition(newPossibleCoordinate);
-			updatePlayerPosition();
-			m_board[prevCoordinate.first][prevCoordinate.second] = '.';
-			return true;
+			if (!isWall(newPossibleCoordinate))
+			{
+				m_player.setPosition(newPossibleCoordinate);
+				updatePlayerPosition();
+				m_board[prevCoordinate.first][prevCoordinate.second] = '.';
+				return true;
+			}
 		}
 		return false;
 	}
@@ -135,7 +138,7 @@ public:
 					// Setting color green, if cell is alien
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
 				}
-				else if (cell == '±')
+				else if (cell == 'Â±')
 				{
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
 				}
@@ -190,7 +193,7 @@ public:
 
 	void putPlayerIntoBoard()
 	{
-		m_board[m_entrance.first][m_entrance.second] = '±';
+		m_board[m_entrance.first][m_entrance.second] = 'Â±';
 	}
 
 	// Game.h
@@ -215,7 +218,7 @@ protected:
 	// Game.h
 	void updatePlayerPosition()
 	{
-		m_board[m_player.getPosition().first][m_player.getPosition().second] = '±';
+		m_board[m_player.getPosition().first][m_player.getPosition().second] = 'Â±';
 	}
 	
 	/// <summary>
