@@ -73,10 +73,16 @@ public:
 		m_player.setPosition(m_entrance);
 		putPlayerIntoBoard();
 
+		makeMorePaths();
+
 		do
 		{
 			generateFirstExit();
-		} while (isWall(generateStartForGenerating(m_exit1)));
+			//stex mi angam miangamic won tvec, aysinqn exitn u entrance hamynkav, dra hamar avelacreci
+			// es paymany
+		} while (isWall(generateStartForGenerating(m_exit1)) || m_exit1 == m_entrance);
+		
+		m_board[m_exit1.first][m_exit1.second] = 'E';
 
 	}
 
@@ -377,7 +383,6 @@ protected:
 		}
 		auto exit = std::make_pair(exit_x, exit_y);
 		m_exit1 = exit;
-		m_board[m_exit1.first][m_exit1.second] = 'E';
 	}
 
 	void generateBoard()
@@ -447,5 +452,15 @@ protected:
 
 		} while (!x_values.empty());
 		m_board[m_entrance.first][m_entrance.second] = '.';
+	}
+	void makeMorePaths()
+	{
+		Coordinate current;
+		for (int i = 0; i < 100; ++i)
+		{
+			// Calculate new coordinates based on the direction
+			current = generateRandomCoordinate({ 1,1 }, { m_size - 2, m_size - 2 });
+			m_board[current.first][current.second] = '.';
+		}
 	}
 };

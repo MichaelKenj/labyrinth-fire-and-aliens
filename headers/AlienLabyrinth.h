@@ -87,7 +87,7 @@ private:
 			for (std::size_t i = 0; i < 4; ++i)
 			{
 				Coordinate next = { current.first + dx[i], current.second + dy[i] };
-				if (next.first < 0 || next.first >= m_board.size() || next.second < 0 || next.second >= m_board[0].size())
+				if (!isValidCoord(next))
 				{
 					continue; // Out of bounds
 				}

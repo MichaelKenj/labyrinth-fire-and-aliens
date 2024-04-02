@@ -53,8 +53,7 @@ public:
 
 		// check is player alive in Player
 		// Put this while into separate function later
-		// m_labyrinth -> isPlayerCaughtByEnemy() && ! m_labyrinth -> isMazeSolved() this is while loop condition
-		while (m_labyrinth-> isPlayerAlive() && !m_labyrinth->isMazeSolved())// here should be isAlive player()
+		while (!m_labyrinth -> isPlayerCaughtByEnemy() && !m_labyrinth -> isMazeSolved())// here should be isAlive player()
 		{
 			m_labyrinth -> printBoard();
 			// move move logic into separate function
@@ -66,22 +65,22 @@ public:
 				isPlayerMoved = m_labyrinth -> movePlayer(UP);
 				break;
 			case 'd':
-				isPlayerMoved = m_labyrinth->movePlayer(RIGHT);
+				isPlayerMoved = m_labyrinth -> movePlayer(RIGHT);
 				break;
 			case 's':
-				isPlayerMoved = m_labyrinth->movePlayer(DOWN);
+				isPlayerMoved = m_labyrinth -> movePlayer(DOWN);
 				break;
 			case 'a':
-				isPlayerMoved = m_labyrinth->movePlayer(LEFT);
+				isPlayerMoved = m_labyrinth -> movePlayer(LEFT);
 				break;
 			}
 			if(isPlayerMoved)
-				m_labyrinth->moveEnemies();
+				m_labyrinth -> moveEnemies();
 			system("cls");	
 		}
 
 		/// Indicate if the game is lost or won
-		if (m_labyrinth ->isPlayerAlive())
+		if (!m_labyrinth ->isPlayerCaughtByEnemy())
 		{
 			//win() function
 			std::cout << "WON\n";
