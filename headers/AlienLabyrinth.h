@@ -14,12 +14,7 @@ public:
 	// HumanPlayer.h 
 	bool isPlayerCaughtByEnemy() const
 	{
-		for (std::size_t i = 0; i < m_AlienPositions.size(); ++i)
-		{
-			if (m_AlienPositions[i].getPosition() == m_player.getPosition())
-				return true;
-		}
-		return false;
+		return m_player.isPlayerCaughtByEnemy(m_AlienPositions);
 	}
 
 	// AlienPlayer.h

@@ -86,6 +86,6 @@ public:
 	// HumanPlayer.h 
 	bool isPlayerCaughtByEnemy() const
 	{
-		return m_board[m_player.getPosition().first][m_player.getPosition().second] == '@';
+		return m_player.isPlayerCaughtByEnemy(m_firePositions);
 	}
 };
