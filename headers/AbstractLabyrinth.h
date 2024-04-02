@@ -17,10 +17,6 @@
 /// do bfs from player(not from aliens
 /// </summary>
 
-
-
-
-
 class AbstractLabyrinth
 {
 protected:
@@ -75,7 +71,6 @@ public:
 		} while (isWall(generateStartForGenerating(m_exit1)) || m_exit1 == m_entrance);
 		
 		m_board[m_exit1.first][m_exit1.second] = 'E';
-
 	}
 
 	//----------HUMAN_PLAYER-------------
@@ -148,6 +143,7 @@ public:
 			std::cout << std::endl;
 		}
 	}
+	
 	bool isValidCoord(const Coordinate& coord) const noexcept
 	{
 		return coord.first >= 0 && coord.first < m_size && coord.second >= 0 && coord.second < m_size;
@@ -181,12 +177,6 @@ public:
 		if (isWinable() && isSolvableAtLeastIn5Moves())
 			return true;
 		return false;
-	}
-
-	// HumanPlayer.h
-	bool isPlayerAlive() const
-	{
-		return m_player.isAlive();
 	}
 
 	void putPlayerIntoBoard()
@@ -425,6 +415,7 @@ protected:
 		} while (!x_values.empty());
 		m_board[m_entrance.first][m_entrance.second] = '.';
 	}
+
 	void makeMorePaths()
 	{
 		Coordinate current;
