@@ -69,12 +69,12 @@ public:
 
 		// Generating maze
 		generateBoard();
-		
+		makeMorePaths();
 		do
 		{
 			generateFirstExit();
 		} while (isWall(generateStartForGenerating(m_exit1)));
-
+		m_board[m_exit1.first][m_exit1.second] = 'E';
 		// Generating objects based on GAME_MODE
 		if (flag == FIRE)
 		{
@@ -152,12 +152,15 @@ public:
 			break;
 			// 0 +1
 		}
-		if (!isWall(newPossibleCoordinate))
+		if (isValidCoord(newPossibleCoordinate))
 		{
-			m_player.setPosition(newPossibleCoordinate);
-			updatePlayerPosition();
-			m_board[prevCoordinate.first][prevCoordinate.second] = '.';
-			return true;
+			if (!isWall(newPossibleCoordinate))
+			{
+				m_player.setPosition(newPossibleCoordinate);
+				updatePlayerPosition();
+				m_board[prevCoordinate.first][prevCoordinate.second] = '.';
+				return true;
+			}
 		}
 		return false;
 	}
@@ -209,7 +212,10 @@ public:
 	{
 		return m_board[coor.first][coor.second] == '#';
 	}
-
+	bool isValidCoord(Coordinate coor) const
+	{
+		return coor.first >= 0 && coor.first < m_size && coor.second >= 0 && coor.second < m_size;
+	}
 	bool isEmptySpace(Coordinate coor) const
 	{
 		return m_board[coor.first][coor.second] == '.';
@@ -388,7 +394,6 @@ private:
 		}
 		auto exit = std::make_pair(exit_x, exit_y);
 		m_exit1 = exit;
-		m_board[m_exit1.first][m_exit1.second] = 'E';
 	}
 
 	void generateBoard()
@@ -459,6 +464,16 @@ private:
 		} while (!x_values.empty());
 		m_board[m_entrance.first][m_entrance.second] = '.';
 	}
+	void makeMorePaths()
+	{
+		Coordinate current;
+		for (int i = 0; i < 100; ++i)
+		{
+			// Calculate new coordinates based on the direction
+			current = generateRandomCoordinate({ 1,1 }, { m_size - 2, m_size - 2 });
+			m_board[current.first][current.second] = '.';
+		}
+	}
 
 /// <summary>
 /// Helper functions for object movements
@@ -485,7 +500,7 @@ private:
 			for (std::size_t i = 0; i < 4; ++i)
 			{
 				Coordinate next = { current.first + dx[i], current.second + dy[i]};
-				if (next.first < 0 || next.first >= m_board.size() || next.second < 0 || next.second >= m_board[0].size()) 
+				if (!isValidCoord(next)) 
 				{
 					continue; // Out of bounds
 				}
@@ -560,11 +575,15 @@ private:
 			for (const auto& neighbor : neighbors)
 			{
 				// Checking statement
-				if (!isWall(neighbor) && m_board[neighbor.first][neighbor.second] != '@')
+				if (isValidCoord(neighbor))
 				{
-					newFirePositions.push_back(neighbor);
-					m_board[neighbor.first][neighbor.second] = '@';
+					if (!isWall(neighbor) && m_board[neighbor.first][neighbor.second] != '@')
+					{
+						newFirePositions.push_back(neighbor);
+						m_board[neighbor.first][neighbor.second] = '@';
+					}
 				}
+				
 			}
 		}
 
