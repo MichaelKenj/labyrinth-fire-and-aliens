@@ -10,25 +10,16 @@
 #include "HumanPlayer.h"
 #include "printHelperMethods.h"
 #include "Game_Mode.h"
+#include "HelperFunctions.h"
 
 /// <summary>
 /// TODO
 /// do bfs from player(not from aliens
 /// </summary>
 
-//                 UP, DOWN, LEFT, RIGHT
-const int dx[4] = { -1, 1, 0, 0 };
-const int dy[4] = { 0, 0, -1, 1 };
 
-using Board = std::vector<std::vector<char>>;
 
-enum DIRECTION
-{
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT
-};
+
 
 class AbstractLabyrinth
 {
@@ -46,6 +37,7 @@ protected:
 	/// Coordinates of exits in the maze
 	Coordinate m_exit1;
 	Coordinate m_exit2;
+
 public:
 	//virtual void solve() const noexcept = 0;
 	virtual void moveEnemies() noexcept = 0;
