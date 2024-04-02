@@ -147,6 +147,10 @@ public:
 			std::cout << std::endl;
 		}
 	}
+	bool isValidCoord(const Coordinate& coord) const noexcept
+	{
+		return coord.first >= 0 && coord.first < m_size && coord.second >= 0 && coord.second < m_size;
+	}
 
 	bool isWall(Coordinate coor) const
 	{

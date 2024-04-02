@@ -19,6 +19,10 @@ public:
 	/// </summary>
 	void moveEnemies() noexcept
 	{
+		if(isPlayerCaughtByEnemy())
+		{
+			return;
+		}
 		// Vector for neighbouring empty cells of already existing fire cells
 		std::vector<Coordinate> newFirePositions;
 
@@ -32,11 +36,15 @@ public:
 			for (const auto& neighbor : neighbors)
 			{
 				// Checking statement
-				if (!isWall(neighbor) && m_board[neighbor.first][neighbor.second] != '@')
+				if (isValidCoord(neighbor))
 				{
-					newFirePositions.push_back(neighbor);
-					m_board[neighbor.first][neighbor.second] = '@';
+					if (!isWall(neighbor) && m_board[neighbor.first][neighbor.second] != '@')
+					{
+						newFirePositions.push_back(neighbor);
+						m_board[neighbor.first][neighbor.second] = '@';
+					}
 				}
+				
 			}
 		}
 
@@ -73,7 +81,6 @@ public:
 			m_firePositions.push_back(new_coor);
 		}
 	}
-
 
 	// HumanPlayer.h 
 	bool isPlayerCaughtByEnemy() const
