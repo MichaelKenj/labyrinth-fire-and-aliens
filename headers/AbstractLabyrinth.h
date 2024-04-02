@@ -239,27 +239,7 @@ protected:
 	}
 
 	// qcenq arandzin file mej
-	std::vector<Coordinate> getNeighbouringCoordinates(const Coordinate coor)
-	{
-		std::vector<Coordinate> res_vec;
-
-		if (coor.first > 0)
-			res_vec.push_back(Coordinate{ coor.first - 1, coor.second });
-
-		if (coor.first < m_size)
-			res_vec.push_back(Coordinate{ coor.first + 1, coor.second });
-
-		if (coor.second > 0)
-			res_vec.push_back(Coordinate{ coor.first, coor.second - 1 });
-
-		if (coor.second < m_size)
-			res_vec.push_back(Coordinate{ coor.first, coor.second + 1 });
-
-		return res_vec;
-	}
-
-	// qcenq arandzin file mej
-	std::size_t moveLeftOrRight(int direction, int x) const
+	std::size_t moveLeftOrRight(DIRECTION direction, std::size_t x) const
 	{
 		if (direction == RIGHT)
 			return x + 1;
@@ -281,7 +261,7 @@ protected:
 	}
 
 	// qcenq arandzin file mej
-	bool isGoodMove(int x, int y, int direction) const
+	bool isGoodMove(int x, int y, DIRECTION direction) const
 	{
 		x = moveLeftOrRight(direction, x);
 		y = moveUpOrDown(direction, y);
@@ -400,7 +380,7 @@ protected:
 			//find n good moves
 			for (std::size_t i = 0; i < 4; ++i)
 			{
-				if (isGoodMove(loc_x, loc_y, i))
+				if (isGoodMove(loc_x, loc_y, static_cast<DIRECTION>(i)))
 					++good_move_counter;
 			}
 
@@ -434,10 +414,10 @@ protected:
 				do
 				{
 					direction = rand() % 4;
-				} while (!isGoodMove(loc_x, loc_y, direction));
+				} while (!isGoodMove(loc_x, loc_y, static_cast<DIRECTION>(direction)));
 
-				loc_x = moveLeftOrRight(direction, loc_x);
-				loc_y = moveUpOrDown(direction, loc_y);
+				loc_x = moveLeftOrRight(static_cast<DIRECTION>(direction), loc_x);
+				loc_y = moveUpOrDown(static_cast<DIRECTION>(direction), loc_y);
 			}
 			m_board[loc_y][loc_x] = '.';
 			good_move_counter = 0;

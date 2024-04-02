@@ -90,8 +90,8 @@ public:
 		}
 		else
 		{
-			stop();
-			//std::cout << "LOSE\n";
+			//stop();
+			std::cout << "LOSE\n";
 		}
 	}
 private:

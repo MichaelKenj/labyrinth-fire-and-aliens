@@ -47,3 +47,24 @@ Coordinate  generateRandomCoordinate(Coordinate coor1, Coordinate coor2)
 	new_coor.second = generateRandomNumber(coor1.second, coor2.second);
 	return new_coor;
 }
+
+
+// qcenq arandzin file mej
+std::vector<Coordinate> getNeighbouringCoordinates(const Coordinate coor, const Board& board)
+{
+	std::vector<Coordinate> res_vec;
+
+	if (coor.first > 0)
+		res_vec.push_back(Coordinate{ coor.first - 1, coor.second });
+
+	if (coor.first < board.size())
+		res_vec.push_back(Coordinate{ coor.first + 1, coor.second });
+
+	if (coor.second > 0)
+		res_vec.push_back(Coordinate{ coor.first, coor.second - 1 });
+
+	if (coor.second < board.size())
+		res_vec.push_back(Coordinate{ coor.first, coor.second + 1 });
+
+	return res_vec;
+}
