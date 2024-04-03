@@ -30,7 +30,7 @@ public:
 		for (const auto& firePosition : m_firePositions)
 		{
 			// Finding and filling vector by neighbouring cells of current cell
-			auto neighbors = getNeighbouringCoordinates(firePosition);
+			auto neighbors = getNeighbouringCoordinates(firePosition, m_board);
 
 			// Checking, if neighbour cell is a wall or its another fire, we dont push into newFirePositions
 			for (const auto& neighbor : neighbors)
@@ -38,7 +38,8 @@ public:
 				// Checking statement
 				if (isValidCoord(neighbor))
 				{
-					if (!isWall(neighbor) && m_board[neighbor.first][neighbor.second] != '@')
+					if (!isWall(neighbor) && m_board[neighbor.first][neighbor.second] != '@' 
+						&& neighbor != m_exit1)
 					{
 						newFirePositions.push_back(neighbor);
 						m_board[neighbor.first][neighbor.second] = '@';
@@ -85,6 +86,6 @@ public:
 	// HumanPlayer.h 
 	bool isPlayerCaughtByEnemy() const
 	{
-		return m_board[m_player.getPosition().first][m_player.getPosition().second] == '@';
+		return m_player.isPlayerCaughtByEnemy(m_firePositions);
 	}
 };

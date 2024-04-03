@@ -17,7 +17,6 @@ private:
 			m_labyrinth = new AlienLabyrinth();
 		}
 	}
-
 private:
 	// Change to smart pointer later
 	AbstractLabyrinth* m_labyrinth;
@@ -35,6 +34,10 @@ public:
 		/// Generating labyrinth based on game mode
 		// Should be in while loop (!isValid())
 		createLabyrinth();
+
+		// Should be 
+		// do while loop(!isSolvable){generate enemies};
+
 
 		/// Clearing menu to start the gameplay
 		system("cls");
@@ -87,8 +90,8 @@ public:
 		}
 		else
 		{
-			stop();
-			//std::cout << "LOSE\n";
+			//stop();
+			std::cout << "LOSE\n";
 		}
 	}
 private:

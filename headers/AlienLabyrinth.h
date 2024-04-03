@@ -4,7 +4,7 @@
 class AlienLabyrinth final : public AbstractLabyrinth
 {
 private:
-	std::vector < Coordinate > m_AlienPositions;
+	std::vector < Alien_Player > m_AlienPositions;
 public:
 	AlienLabyrinth()
 	{
@@ -14,11 +14,9 @@ public:
 	// HumanPlayer.h 
 	bool isPlayerCaughtByEnemy() const
 	{
-		return std::find(
-			m_AlienPositions.begin(),
-			m_AlienPositions.end(),
-			m_player.getPosition()) != m_AlienPositions.end();
+		return m_player.isPlayerCaughtByEnemy(m_AlienPositions);
 	}
+
 	// AlienPlayer.h
 	void moveEnemies() noexcept
 	{
@@ -27,10 +25,10 @@ public:
 
 		for (std::size_t i = 0; i < m_AlienPositions.size(); ++i)
 		{
-			Coordinate newPosition = findPath(m_AlienPositions[i], m_player.getPosition());
-			m_board[m_AlienPositions[i].first][m_AlienPositions[i].second] = '.';
+			Coordinate newPosition = findPath(m_AlienPositions[i].getPosition(), m_player.getPosition());
+			m_board[m_AlienPositions[i].getPosition().first][m_AlienPositions[i].getPosition().second] = '.';
 			m_board[newPosition.first][newPosition.second] = '&';
-			m_AlienPositions[i] = newPosition;
+			m_AlienPositions[i].setPosition(newPosition);
 		}
 	}
 
@@ -59,7 +57,7 @@ public:
 			// Setting '&' into board
 			m_board[new_coor.first][new_coor.second] = '&';
 
-			m_AlienPositions.push_back(new_coor);
+			m_AlienPositions.push_back(Alien_Player(new_coor));
 		}
 	}
 /// <summary>

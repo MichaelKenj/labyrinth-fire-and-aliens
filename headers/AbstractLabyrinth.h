@@ -10,25 +10,12 @@
 #include "HumanPlayer.h"
 #include "printHelperMethods.h"
 #include "Game_Mode.h"
+#include "HelperFunctions.h"
 
 /// <summary>
 /// TODO
 /// do bfs from player(not from aliens
 /// </summary>
-
-//                 UP, DOWN, LEFT, RIGHT
-const int dx[4] = { -1, 1, 0, 0 };
-const int dy[4] = { 0, 0, -1, 1 };
-
-using Board = std::vector<std::vector<char>>;
-
-enum DIRECTION
-{
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT
-};
 
 class AbstractLabyrinth
 {
@@ -46,6 +33,7 @@ protected:
 	/// Coordinates of exits in the maze
 	Coordinate m_exit1;
 	Coordinate m_exit2;
+
 public:
 	//virtual void solve() const noexcept = 0;
 	virtual void moveEnemies() noexcept = 0;
@@ -83,7 +71,6 @@ public:
 		} while (isWall(generateStartForGenerating(m_exit1)) || m_exit1 == m_entrance);
 		
 		m_board[m_exit1.first][m_exit1.second] = 'E';
-
 	}
 
 	//----------HUMAN_PLAYER-------------
@@ -156,6 +143,7 @@ public:
 			std::cout << std::endl;
 		}
 	}
+	
 	bool isValidCoord(const Coordinate& coord) const noexcept
 	{
 		return coord.first >= 0 && coord.first < m_size && coord.second >= 0 && coord.second < m_size;
@@ -189,12 +177,6 @@ public:
 		if (isWinable() && isSolvableAtLeastIn5Moves())
 			return true;
 		return false;
-	}
-
-	// HumanPlayer.h
-	bool isPlayerAlive() const
-	{
-		return m_player.isAlive();
 	}
 
 	void putPlayerIntoBoard()
@@ -247,27 +229,7 @@ protected:
 	}
 
 	// qcenq arandzin file mej
-	std::vector<Coordinate> getNeighbouringCoordinates(const Coordinate coor)
-	{
-		std::vector<Coordinate> res_vec;
-
-		if (coor.first > 0)
-			res_vec.push_back(Coordinate{ coor.first - 1, coor.second });
-
-		if (coor.first < m_size)
-			res_vec.push_back(Coordinate{ coor.first + 1, coor.second });
-
-		if (coor.second > 0)
-			res_vec.push_back(Coordinate{ coor.first, coor.second - 1 });
-
-		if (coor.second < m_size)
-			res_vec.push_back(Coordinate{ coor.first, coor.second + 1 });
-
-		return res_vec;
-	}
-
-	// qcenq arandzin file mej
-	std::size_t moveLeftOrRight(int direction, int x) const
+	std::size_t moveLeftOrRight(DIRECTION direction, std::size_t x) const
 	{
 		if (direction == RIGHT)
 			return x + 1;
@@ -289,7 +251,7 @@ protected:
 	}
 
 	// qcenq arandzin file mej
-	bool isGoodMove(int x, int y, int direction) const
+	bool isGoodMove(int x, int y, DIRECTION direction) const
 	{
 		x = moveLeftOrRight(direction, x);
 		y = moveUpOrDown(direction, y);
@@ -408,7 +370,7 @@ protected:
 			//find n good moves
 			for (std::size_t i = 0; i < 4; ++i)
 			{
-				if (isGoodMove(loc_x, loc_y, i))
+				if (isGoodMove(loc_x, loc_y, static_cast<DIRECTION>(i)))
 					++good_move_counter;
 			}
 
@@ -442,10 +404,10 @@ protected:
 				do
 				{
 					direction = rand() % 4;
-				} while (!isGoodMove(loc_x, loc_y, direction));
+				} while (!isGoodMove(loc_x, loc_y, static_cast<DIRECTION>(direction)));
 
-				loc_x = moveLeftOrRight(direction, loc_x);
-				loc_y = moveUpOrDown(direction, loc_y);
+				loc_x = moveLeftOrRight(static_cast<DIRECTION>(direction), loc_x);
+				loc_y = moveUpOrDown(static_cast<DIRECTION>(direction), loc_y);
 			}
 			m_board[loc_y][loc_x] = '.';
 			good_move_counter = 0;
@@ -453,6 +415,7 @@ protected:
 		} while (!x_values.empty());
 		m_board[m_entrance.first][m_entrance.second] = '.';
 	}
+
 	void makeMorePaths()
 	{
 		Coordinate current;

@@ -1,49 +1,49 @@
 #pragma once
 #include "AbstractPlayer.h"
+#include "HelperFunctions.h"
 
 class Human_Player final : public AbstractPlayer
 {
 private:
 	Coordinate m_position;
-	bool m_isAlive;
 public:
-    Human_Player(Coordinate position = { 1,1 }) : m_isAlive(true), m_position(position) {}
+    Human_Player(Coordinate position = { 1,1 }) : m_position(position) 
+	{}
 
 	/// <summary>
-	/// Changes player's position depends on pressed button
+	/// Changes player's position depends on direction
 	/// </summary>
 	void move() 
 	{
 		// TODO
 		// Implement function, which changes position in board
+		// tox veradaracni possibleNewCoordinate, heto mi tex stugenq inqy valid a te che, ete ha
+		// uremn kanenq setPosition()
 	}
 
-	/// <summary>
-	/// Sets playes's position
-	/// </summary>
-	/// <param name="position"></param>
 	void setPosition(Coordinate position)
 	{
 		m_position = position;
 	}
 
-	/// <summary>
-	/// Gives player's current position
-	/// </summary>
-	/// <returns></returns>
 	Coordinate getPosition() const 
 	{
 		return m_position;
 	}
 
-	bool isAlive() const
+	bool isPlayerCaughtByEnemy(const std::vector<Coordinate>& enemyPositions) const
 	{
-		return m_isAlive;
+		return std::find(enemyPositions.begin(), enemyPositions.end(), m_position) != enemyPositions.end();
+		
 	}
 
-	// Is this useless?
-	void killPlayer()
+	bool isPlayerCaughtByEnemy(const std::vector<Alien_Player>& enemyPositions) const
 	{
-		m_isAlive = false;
+		for (std::size_t i = 0; i < enemyPositions.size(); ++i)
+		{
+			if (enemyPositions[i].getPosition() == m_position)
+				return true;
+		}
+		return false;
 	}
 };
