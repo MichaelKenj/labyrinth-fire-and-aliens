@@ -9,7 +9,6 @@ private:
 public:
 	FireLabyrinth()
 	{
-		generateEnemy();
 		m_player.setPosition(m_entrance);
 		putPlayerIntoBoard();
 	}

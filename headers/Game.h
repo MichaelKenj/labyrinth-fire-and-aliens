@@ -42,6 +42,12 @@ public:
 		/// Clearing menu to start the gameplay
 		system("cls");
 	}
+	Game(const Game& game)
+	{
+		m_labyrinth = game.m_labyrinth;
+		m_gameMode = game.m_gameMode;
+	}
+
 	~Game() {
 		delete m_labyrinth; // Ensure proper cleanup
 	}
@@ -90,10 +96,26 @@ public:
 		}
 		else
 		{
-			//stop();
-			std::cout << "LOSE\n";
+			stop();
+			//std::cout << "LOSE\n";
 		}
 	}
+
+	/// <summary>
+	/// Showing solution of labyrinth
+	/// </summary>
+	void show_solution()
+	{
+		// TODO
+		// Implement function, which prints winning strategy from starting cell
+		// This function should be called in stop(), if player wants
+		auto winVec = solve();
+		for (auto i : winVec)
+		{
+			printCoordinate(i);
+		}
+	}
+
 private:
 	// Game over print
 	void stop()
@@ -105,14 +127,10 @@ private:
 		slideGameOver();
 	}
 
-	/// <summary>
-	/// Showing solution of labyrinth
-	/// </summary>
-	void show_solution()
+	std::vector<Coordinate> solve()
 	{
-		// TODO
-		// Implement function, which prints winning strategy from starting cell
-		// This function should be called in stop(), if player wants
+
+		
 	}
 
 	/// <summary>

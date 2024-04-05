@@ -8,7 +8,18 @@ private:
 public:
 	AlienLabyrinth()
 	{
-		generateEnemy();
+	}
+
+	AlienLabyrinth(const AlienLabyrinth& other)
+		: AbstractLabyrinth(other.m_size), m_AlienPositions(other.m_AlienPositions) {
+		// Copy the player position
+		m_player = other.m_player;
+		// Copy the board
+		m_board = other.m_board;
+		// Copy the entrance and exits
+		m_entrance = other.m_entrance;
+		m_exit1 = other.m_exit1;
+		m_exit2 = other.m_exit2;
 	}
 
 	// HumanPlayer.h 
@@ -25,11 +36,12 @@ public:
 
 		for (std::size_t i = 0; i < m_AlienPositions.size(); ++i)
 		{
-			Coordinate newPosition = findPath(m_AlienPositions[i].getPosition(), m_player.getPosition());
+			Coordinate newPosition = findPath(m_AlienPositions[i].getPosition(), m_player.getPosition())[1];
 			m_board[m_AlienPositions[i].getPosition().first][m_AlienPositions[i].getPosition().second] = '.';
 			m_board[newPosition.first][newPosition.second] = '&';
 			m_AlienPositions[i].setPosition(newPosition);
 		}
+
 	}
 
 	/// <summary>
@@ -59,54 +71,5 @@ public:
 
 			m_AlienPositions.push_back(Alien_Player(new_coor));
 		}
-	}
-/// <summary>
-/// Helper functions for object movements
-/// </summary>
-private:
-	Coordinate findPath(Coordinate start, Coordinate end)
-	{
-		std::vector<std::vector<bool>> visited(m_board.size(), std::vector<bool>(m_board[0].size(), false));
-		std::vector<std::vector<Coordinate>> parent(m_board.size(), std::vector<Coordinate>(m_board[0].size()));
-
-		std::queue<Coordinate> queue;
-		queue.push(start);
-		visited[start.first][start.second] = true;
-		parent[start.first][start.second] = start;
-
-		while (!queue.empty()) {
-			Coordinate current = queue.front();
-			queue.pop();
-
-			if (current == end) {
-				break;
-			}
-
-			for (std::size_t i = 0; i < 4; ++i)
-			{
-				Coordinate next = { current.first + dx[i], current.second + dy[i] };
-				if (!isValidCoord(next))
-				{
-					continue; // Out of bounds
-				}
-				if (m_board[next.first][next.second] == '#' || visited[next.first][next.second]) {
-					continue; // Wall or already visited
-				}
-				visited[next.first][next.second] = true;
-				parent[next.first][next.second] = current;
-				queue.push(next);
-			}
-		}
-
-		// Reconstruct the path
-		std::vector<Coordinate> path;
-		Coordinate current = end;
-		while (current != start) {
-			path.push_back(current);
-			current = parent[current.first][current.second];
-		}
-		path.push_back(start);
-		std::reverse(path.begin(), path.end());
-		return path[1];
-	}
+	}	
 };

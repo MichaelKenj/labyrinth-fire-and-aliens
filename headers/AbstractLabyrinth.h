@@ -34,6 +34,7 @@ protected:
 	Coordinate m_exit1;
 	Coordinate m_exit2;
 
+	std::size_t m_exitCount;
 public:
 	//virtual void solve() const noexcept = 0;
 	virtual void moveEnemies() noexcept = 0;
@@ -48,6 +49,8 @@ public:
 	/// <param name="size"></param>
 	explicit AbstractLabyrinth(std::size_t size = 20)
 		: m_size(size)
+		, m_exit1{-1,-1}
+		, m_exit2{-1,-1}
 	{
 		// Filling board with '#'
 		m_board.assign(m_size, std::vector<char>(m_size, '#'));
@@ -56,21 +59,51 @@ public:
 		generateEntrance();
 
 		// Generating maze
-		generateBoard();
+		do
+		{
+			generateBoard();
+			bool isOutterLoopBraked = false;
+			for (std::size_t i = 0; i < 30; ++i)
+			{
+				generateEnemy();
+				if (isSolvableAtLeastIn5Moves())
+				{
+					isOutterLoopBraked = true;
+					break;
+				}
+			}
+			if (isOutterLoopBraked)
+				break;
+		} while (isSolvableAtLeastIn5Moves());
 
+		
 		m_player.setPosition(m_entrance);
 		putPlayerIntoBoard();
 
-		makeMorePaths();
-
+		std::size_t exitCount;
 		do
 		{
-			generateFirstExit();
+			exitCount = generateExits();
 			//stex mi angam miangamic won tvec, aysinqn exitn u entrance hamynkav, dra hamar avelacreci
 			// es paymany
-		} while (isWall(generateStartForGenerating(m_exit1)) || m_exit1 == m_entrance);
+		} while (isValidExit(exitCount));
 		
 		m_board[m_exit1.first][m_exit1.second] = 'E';
+		if(exitCount == 2)
+			m_board[m_exit2.first][m_exit2.second] = 'E';
+		m_exitCount = exitCount;
+	}
+
+	AbstractLabyrinth(const AbstractLabyrinth& other)
+		: m_player(other.m_player),
+		m_board(other.m_board),
+		m_size(other.m_size),
+		m_entrance(other.m_entrance),
+		m_exit1(other.m_exit1),
+		m_exit2(other.m_exit2)
+	{
+		// Perform a deep copy of the board
+		m_board = other.m_board;
 	}
 
 	//----------HUMAN_PLAYER-------------
@@ -113,6 +146,23 @@ public:
 		}
 		return false;
 	}
+
+	bool movePlayer(Coordinate coor)
+	{
+		auto prevCoordinate = m_player.getPosition();
+		if (isValidCoord(coor))
+		{
+			if (!isWall(coor))
+			{
+				m_player.setPosition(coor);
+				updatePlayerPosition();
+				m_board[prevCoordinate.first][prevCoordinate.second] = '.';
+				m_player.setPosition(coor);
+				return true;
+			}
+		}
+		return false;
+	}
 	//----------HUMAN_PLAYER-------------
 
 	void printBoard() const
@@ -133,7 +183,7 @@ public:
 				}
 				else if (cell == '±')
 				{
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
 				}
 				std::cout << std::setw(2) << cell;
 
@@ -160,28 +210,19 @@ public:
 	}
 
 	// Game.h
-	bool isWinable() const
-	{
-		// Should call solve() and if vector is not empty -> its winable
-	}
-
-	// Game.h
 	bool isSolvableAtLeastIn5Moves() const
 	{
 		// Should call solve() and if vector.size() >= 5 -> its solvable in 5 moves
-	}
-
-	// Game.h
-	bool isValid() const
-	{
-		if (isWinable() && isSolvableAtLeastIn5Moves())
-			return true;
-		return false;
-	}
-
-	void putPlayerIntoBoard()
-	{
-		m_board[m_entrance.first][m_entrance.second] = '±';
+		auto winningPath = findPath(m_entrance, m_exit1);
+		if (m_exitCount == 1)
+		{
+			return winningPath.size() >= 5;
+		}
+		else
+		{
+			auto winningPath2 = findPath(m_entrance, m_exit2);
+			return winningPath.size() >= 5 || winningPath2.size() >= 5;
+		}
 	}
 
 	// Game.h
@@ -189,6 +230,71 @@ public:
 	{
 		return m_player.getPosition() == m_exit1 || m_player.getPosition() == m_exit2;
 	}
+
+	bool isValidExit(std::size_t exitcount)
+	{
+		if (exitcount == 1)
+		{
+			return isWall(generateStartForGenerating(m_exit1)) || m_exit1 == m_entrance;
+		}
+		else
+		{
+			return isWall(generateStartForGenerating(m_exit1))
+				|| isWall(generateStartForGenerating(m_exit2))
+				|| m_exit1 == m_entrance
+				|| m_exit2 == m_entrance;
+		}
+	}
+	
+	void putPlayerIntoBoard()
+	{
+		m_board[m_entrance.first][m_entrance.second] = '±';
+	}
+
+	// Getters
+	Coordinate getPlayerPosition() const
+	{
+		return m_player.getPosition();
+	}
+	Human_Player getPlayer() const {
+		return m_player;
+	}
+	Board getBoard() const {
+		return m_board;
+	}
+	std::size_t getSize() const {
+		return m_size;
+	}
+	Coordinate getEntrance() const {
+		return m_entrance;
+	}
+	Coordinate getExit1() const {
+		return m_exit1;
+	}
+	Coordinate getExit2() const {
+		return m_exit2;
+	}
+
+	// Setters
+	void setPlayer(const Human_Player& player) {
+		m_player = player;
+	}
+	void setBoard(const Board& board) {
+		m_board = board;
+	}
+	void setSize(std::size_t size) {
+		m_size = size;
+	}
+	void setEntrance(const Coordinate& entrance) {
+		m_entrance = entrance;
+	}
+	void setExit1(const Coordinate& exit1) {
+		m_exit1 = exit1;
+	}
+	void setExit2(const Coordinate& exit2) {
+		m_exit2 = exit2;
+	}
+
 /// <summary>
 /// Functions which solves maze
 /// </summary>
@@ -198,10 +304,7 @@ protected:
 	/// </summary>
 	/// <returns>Vector of coordinates of winning path</returns> 
 	// Game.h
-	std::vector< Coordinate > solve()
-	{
-
-	}
+	
 
 	// Game.h
 	void updatePlayerPosition()
@@ -214,6 +317,7 @@ protected:
 	/// </summary>
 protected:
 	// qcenq arandzin file mej
+	// Mi hatik ners a mtnum
 	Coordinate generateStartForGenerating(const Coordinate entrance) const
 	{
 		if (entrance.first != 0 && entrance.first != m_size - 1)
@@ -309,42 +413,88 @@ protected:
 
 	}
 
-	void generateSecondExit()
+	std::size_t generateExits()
 	{
-
-	}
-
-	void generateFirstExit()
-	{
-		// TODO
-		// change exit char
-		//std::size_t exit_count = generateRandomNumber(1, 2);
-		DIRECTION side = static_cast<DIRECTION>(generateRandomNumber(0, 3));
-		std::size_t exit_x;
-		std::size_t exit_y;
-		switch (side)
+		std::size_t exit_count = generateRandomNumber(1, 2);
+		if (exit_count == 1)
 		{
-		case UP:
-			exit_x = 0;
-			exit_y = generateRandomNumber(1, m_size - 2);
-			break;
-		case DOWN:
-			exit_x = m_size - 1;
-			exit_y = generateRandomNumber(1, m_size - 2);
-			break;
-		case LEFT:
-			exit_x = generateRandomNumber(1, m_size - 2);
-			exit_y = 0;
-
-			break;
-		case RIGHT:
-
-			exit_x = generateRandomNumber(1, m_size - 2);
-			exit_y = m_size - 1;
-			break;
+			DIRECTION side1 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
+			Coordinate exit1;
+			switch (side1)
+			{
+			case UP:
+				exit1.first = 0;
+				exit1.second = generateRandomNumber(1, m_size - 2);
+				break;
+			case DOWN:
+				exit1.first = m_size - 1;
+				exit1.second = generateRandomNumber(1, m_size - 2);
+				break;
+			case LEFT:
+				exit1.first = generateRandomNumber(1, m_size - 2);
+				exit1.second = 0;
+				break;
+			case RIGHT:
+				exit1.first = generateRandomNumber(1, m_size - 2);
+				exit1.second = m_size - 1;
+				break;
+			}
+			m_exit1 = exit1;
 		}
-		auto exit = std::make_pair(exit_x, exit_y);
-		m_exit1 = exit;
+		else
+		{
+			DIRECTION side1 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
+			Coordinate exit1;
+			switch (side1)
+			{
+			case UP:
+				exit1.first = 0;
+				exit1.second = generateRandomNumber(1, m_size - 2);
+				break;
+			case DOWN:
+				exit1.first = m_size - 1;
+				exit1.second = generateRandomNumber(1, m_size - 2);
+				break;
+			case LEFT:
+				exit1.first = generateRandomNumber(1, m_size - 2);
+				exit1.second = 0;
+				break;
+			case RIGHT:
+				exit1.first = generateRandomNumber(1, m_size - 2);
+				exit1.second = m_size - 1;
+				break;
+			}
+			m_exit1 = exit1;
+
+			DIRECTION side2 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
+			Coordinate exit2;
+
+			do
+			{
+				switch (side2)
+				{
+				case UP:
+					exit2.first = 0;
+					exit2.second = generateRandomNumber(1, m_size - 2);
+					break;
+				case DOWN:
+					exit2.first = m_size - 1;
+					exit2.second = generateRandomNumber(1, m_size - 2);
+					break;
+				case LEFT:
+					exit2.first = generateRandomNumber(1, m_size - 2);
+					exit2.second = 0;
+					break;
+				case RIGHT:
+					exit2.first = generateRandomNumber(1, m_size - 2);
+					exit2.second = m_size - 1;
+					break;
+				}
+			} while (exit2 == m_exit1);
+			m_exit2 = exit2;
+		}
+		return exit_count;
+
 	}
 
 	void generateBoard()
@@ -425,5 +575,51 @@ protected:
 			current = generateRandomCoordinate({ 1,1 }, { m_size - 2, m_size - 2 });
 			m_board[current.first][current.second] = '.';
 		}
+	}
+
+	std::vector<Coordinate> findPath(Coordinate start, Coordinate end) const
+	{
+		std::vector<std::vector<bool>> visited(m_board.size(), std::vector<bool>(m_board[0].size(), false));
+		std::vector<std::vector<Coordinate>> parent(m_board.size(), std::vector<Coordinate>(m_board[0].size()));
+
+		std::queue<Coordinate> queue;
+		queue.push(start);
+		visited[start.first][start.second] = true;
+		parent[start.first][start.second] = start;
+
+		while (!queue.empty()) {
+			Coordinate current = queue.front();
+			queue.pop();
+
+			if (current == end) {
+				break;
+			}
+
+			for (std::size_t i = 0; i < 4; ++i)
+			{
+				Coordinate next = { current.first + dx[i], current.second + dy[i] };
+				if (!isValidCoord(next))
+				{
+					continue; // Out of bounds
+				}
+				if (m_board[next.first][next.second] == '#' || visited[next.first][next.second]) {
+					continue; // Wall or already visited
+				}
+				visited[next.first][next.second] = true;
+				parent[next.first][next.second] = current;
+				queue.push(next);
+			}
+		}
+
+		// Reconstruct the path
+		std::vector<Coordinate> path;
+		Coordinate current = end;
+		while (current != start) {
+			path.push_back(current);
+			current = parent[current.first][current.second];
+		}
+		path.push_back(start);
+		std::reverse(path.begin(), path.end());
+		return path;
 	}
 };
