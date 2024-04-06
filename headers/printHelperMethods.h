@@ -80,13 +80,13 @@ void printFrame(const std::vector<std::string>& _hell)
 // Sliding Hello
 void slideGameOver()
 {  
-    std::string row1 = "    ±±±±  ±±±  ±   ± ±±±±±       ±±±  ±   ± ±±±±± ±±±± ";
-    std::string row2 = "   ±     ±   ± ±± ±± ±          ±   ± ±   ± ±     ±   ±";
-    std::string row3 = "   ±  ±± ±±±±± ± ± ± ±±±±       ±   ±  ± ±  ±±±±  ±±±± ";
-    std::string row4 = "   ±   ± ±   ± ±   ± ±          ±   ±  ± ±  ±     ±   ±";
-    std::string row5 = "   ±±±±  ±   ± ±   ± ±±±±±       ±±±    ±   ±±±±± ±   ±";
+    std::string row1 = " ±±±±  ±±±  ±   ± ±±±±±       ±±±  ±   ± ±±±±± ±±±± ";
+    std::string row2 = "±     ±   ± ±± ±± ±          ±   ± ±   ± ±     ±   ±";
+    std::string row3 = "±  ±± ±±±±± ± ± ± ±±±±       ±   ±  ± ±  ±±±±  ±±±± ";
+    std::string row4 = "±   ± ±   ± ±   ± ±          ±   ±  ± ±  ±     ±   ±";
+    std::string row5 = "±±±±  ±   ± ±   ± ±±±±±       ±±±    ±   ±±±±± ±   ±";
     std::vector<std::string> _hello{ row1, row2, row3, row4, row5};
-    int spaces = 24;
+    int spaces = 10;
 
     std::string sps = "";
     for (int i = 0; i < 50; ++i)
