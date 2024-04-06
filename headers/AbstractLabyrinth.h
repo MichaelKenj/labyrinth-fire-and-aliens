@@ -14,7 +14,12 @@
 
 /// <summary>
 /// TODO
-/// do bfs from player(not from aliens
+/// do bfs from player(not from aliens)
+/// 
+/// Ditarkel winning pathy, u ditarkel sax razvlletvlennianery et pathi vra
+/// u et keteric gntel amenaheracvac kety u ytex dnel enemynerin
+/// stugum enq wini vra, ete inch vor meky xangaruma iran iran chenq dnum ytex
+/// u tenc sharunak, ete qanaky chi bavararum, petq a tazuc generacnel labirinty
 /// </summary>
 
 class AbstractLabyrinth
