@@ -516,17 +516,6 @@ protected:
 		m_board[m_entrance.first][m_entrance.second] = '.';
 	}
 
-	void makeMorePaths()
-	{
-		Coordinate current;
-		for (int i = 0; i < 100; ++i)
-		{
-			// Calculate new coordinates based on the direction
-			current = generateRandomCoordinate({ 1,1 }, { m_size - 2, m_size - 2 });
-			m_board[current.first][current.second] = '.';
-		}
-	}
-
 	std::vector<Coordinate> findPath(Coordinate start, Coordinate end) const
 	{
 		std::vector<std::vector<bool>> visited(m_board.size(), std::vector<bool>(m_board[0].size(), false));
