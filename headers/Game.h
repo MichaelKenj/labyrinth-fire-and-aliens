@@ -39,7 +39,7 @@ public:
 
 
 		/// Clearing menu to start the gameplay
-		ClearScreen();
+		system("cls");
 	}
 
 	Game(const Game& game)
@@ -105,7 +105,7 @@ public:
 			}
 			if(isPlayerMoved)
 				m_labyrinth -> moveEnemies();
-			ClearScreen();
+			ClearWindow();
 		}
 
 		if (!m_labyrinth ->isPlayerCaughtByEnemy())
@@ -221,7 +221,7 @@ private:
 				++index;
 			}
 			Sleep(120);
-			ClearScreen();
+			system("cls");
 		}
 	}
 };
