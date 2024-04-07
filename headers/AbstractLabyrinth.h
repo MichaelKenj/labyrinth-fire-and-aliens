@@ -24,7 +24,6 @@
 /// u tenc sharunak, ete qanaky chi bavararum, petq a tazuc generacnel labirinty
 /// </summary>
 
-
 struct Cell {
 	int row, col;
 	bool up, down, left, right;
@@ -64,7 +63,7 @@ public:
 	/// </summary>
 	/// <param name="flag"></param>
 	/// <param name="size"></param>
-	explicit AbstractLabyrinth(std::size_t size = 20)
+	explicit AbstractLabyrinth(std::size_t size = 41)
 		: m_size(size)
 		, m_exit{-1,-1}
 	{}

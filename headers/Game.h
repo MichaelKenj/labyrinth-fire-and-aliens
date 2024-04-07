@@ -224,5 +224,4 @@ private:
 			system("cls");
 		}
 	}
-
 };
