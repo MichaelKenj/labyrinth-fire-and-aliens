@@ -58,15 +58,15 @@ public:
 	void play()
 	{
 		
-		/*auto inter = m_labyrinth->findIntersectionCoordinate(m_labyrinth->getWinPath());
-		std::vector<Coordinate> farthestCoors;
-		for (auto i : inter)
-		{
-			auto farthest = m_labyrinth->findFarthestEmptyCell(i);
-			farthestCoors.push_back(farthest);
-		}*/
+		//auto inter = m_labyrinth->findIntersectionCoordinate(m_labyrinth->getWinPath());
+		//std::vector<Coordinate> farthestCoors;
+		//for (auto i : inter)
+		//{
+		//	auto farthest = m_labyrinth->findFarthestEmptyCell(i);
+		//	farthestCoors.push_back(farthest);
+		//}
 
-		while (!m_labyrinth -> isPlayerCaughtByEnemy() && !m_labyrinth -> isMazeSolved())// here should be isAlive player()
+		while (!m_labyrinth -> isPlayerCaughtByEnemy() && !m_labyrinth -> isMazeSolved())
 		{
 			m_labyrinth->printBoard();
 			/*std::cout << "Winning path: ";
@@ -210,7 +210,7 @@ private:
 		m_labyrinth -> setPlayerPosition(m_labyrinth -> getEntrance());
 		m_labyrinth -> restoreEnemy();
 		m_labyrinth -> restoreBoard();
-		while (!m_labyrinth -> isPlayerCaughtByEnemy() && !m_labyrinth -> isMazeSolved())// here should be isAlive player()
+		while (!m_labyrinth -> isPlayerCaughtByEnemy() && !m_labyrinth -> isMazeSolved())
 		{
 			m_labyrinth -> printBoard();
 			bool isPlayerMoved = false;

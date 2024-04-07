@@ -40,6 +40,7 @@ public:
 
 			auto possibleEnemyPositions = generateEnemy();
 			//removeDuplicatesFromVector(possibleEnemyPositions);
+
 			if (possibleEnemyPositions.size() >= 3 && possibleEnemyPositions.size() <= 5)
 			{
 				m_alienPositions = possibleEnemyPositions;

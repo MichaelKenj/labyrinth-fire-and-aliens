@@ -13,6 +13,7 @@
 #include "Game_Mode.h"
 #include "HelperFunctions.h"
 #include <map>
+#include <unordered_map>
 
 /// <summary>
 /// TODO
@@ -76,20 +77,24 @@ public:
 		//const int dy[4] = { -1, 0, 1, 0 };
 		Coordinate prevCoordinate = m_player.getPosition();
 		Coordinate newPossibleCoordinate;
-		newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[1], m_player.getPosition().second + dy[1] };
+		newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[1], 
+			m_player.getPosition().second + dy[1] };
 
 		switch (direction)
 		{
 		case LEFT:
-			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[0], m_player.getPosition().second + dy[0] };
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[0], 
+				m_player.getPosition().second + dy[0] };
 			break;
 		case UP:
 			break;
 		case RIGHT:
-			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[2], m_player.getPosition().second + dy[2] };
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[2], 
+				m_player.getPosition().second + dy[2] };
 			break;
 		case DOWN:
-			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[3], m_player.getPosition().second + dy[3] };
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[3], 
+				m_player.getPosition().second + dy[3] };
 			break;
 		}
 		if (isValidCoord(newPossibleCoordinate))
@@ -126,6 +131,7 @@ public:
 	bool isSolvable()
 	{
 		Human_Player copy_m_player = m_player;
+
 		/// Maze
 		Board copy_m_board = m_board;
 
@@ -138,11 +144,10 @@ public:
 		/// Coordinates of exits in the maze
 		Coordinate copy_m_exit = m_exit;
 
-
-
 		auto winPath = m_winningPath;
 		int index = 0;
-		while (!isPlayerCaughtByEnemy() && !isMazeSolved())// here should be isAlive player()
+
+		while (!isPlayerCaughtByEnemy() && !isMazeSolved())
 		{
 
 			bool isPlayerMoved = false;
@@ -159,6 +164,7 @@ public:
 		m_size = copy_m_size;
 		m_entrance = copy_m_entrance;
 		m_exit = copy_m_exit;
+		restoreEnemy();
 
 		return isPlayerCaughtByEnemy();
 	}
