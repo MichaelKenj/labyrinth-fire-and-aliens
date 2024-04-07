@@ -15,8 +15,7 @@ public:
 
 			// Generates entrance
 			generateEntrance();
-
-			generateBoard();
+			generateMaze();
 
 			m_player.setPosition(m_entrance);
 			putPlayerIntoBoard();
