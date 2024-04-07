@@ -58,6 +58,19 @@ void printChooseGameModeFrame()
 	goToXY(10, 12); std::cout << "Select option: ";
 }
 
+void printIsPlayerWantsToShowSolutionFrame()
+{
+    setCursor(0, 0);
+    srand((unsigned)time(NULL));
+    system("cls");
+    goToXY(10, 5); std::cout << " +----------------------------------+ ";
+    goToXY(10, 6); std::cout << " | Do you want to see the solution? | ";
+    goToXY(10, 7); std::cout << " +----------------------------------+ ";
+    goToXY(10, 9); std::cout << "1. Yes";
+    goToXY(10, 10); std::cout << "2. No";
+    goToXY(10, 11); std::cout << "Select option: ";
+}
+
 void printCoordinate(Coordinate cord)
 {
 	std::cout << "(" << cord.first << "," << cord.second << ") ";

@@ -41,6 +41,7 @@ public:
 		/// Clearing menu to start the gameplay
 		system("cls");
 	}
+
 	Game(const Game& game)
 	{
 		m_labyrinth = game.m_labyrinth;
@@ -57,35 +58,36 @@ public:
 	void play()
 	{
 		
-		
-		//m_labyrinth->printBoard();
-		//auto intersections = m_labyrinth->findIntersectionCoordinate(m_labyrinth->getWinPath());
-		//std::cout << "Winning paths: ";
-		//for (auto u : m_labyrinth->getWinPath())
-		//{
-		//		printCoordinate(u);
-		//}
-		//for (auto i : intersections)
-		//{
-		//		auto coor = m_labyrinth -> findFarthestEmptyCell(i);
-		//		std::cout << "\n(" << i.first << ";" << i.second << ") -> " <<
-		//			"(" << coor.first << ";" << coor.second << ")";
-		//}
-		
-		auto i = m_labyrinth->findShortestPath(m_labyrinth->getEntrance(), m_labyrinth->getExit1());
-		// check is player alive in Player
-		// Put this while into separate function later
-		int index = 0;
+		/*auto inter = m_labyrinth->findIntersectionCoordinate(m_labyrinth->getWinPath());
+		std::vector<Coordinate> farthestCoors;
+		for (auto i : inter)
+		{
+			auto farthest = m_labyrinth->findFarthestEmptyCell(i);
+			farthestCoors.push_back(farthest);
+		}*/
+
 		while (!m_labyrinth -> isPlayerCaughtByEnemy() && !m_labyrinth -> isMazeSolved())// here should be isAlive player()
 		{
 			m_labyrinth->printBoard();
-			std::cout << "Shortest path: ";
-			for (auto u : i)
+			/*std::cout << "Winning path: ";
+			for (auto i : m_labyrinth->getWinPath())
+				printCoordinate(i);
+
+			std::cout << '\n';
+			
+			for (int i = 0; i < inter.size(); ++i)
 			{
-				printCoordinate(u);
-			}
+				printCoordinate(inter[i]);
+				std::cout << " -> ";
+				printCoordinate(farthestCoors[i]);
+				std::cout << "Distance(From Player): " << m_labyrinth->findPath(inter[i], m_labyrinth->getEntrance()).size() << " ";
+				std::cout << "Distance(From Farthest): " << m_labyrinth->findPath(inter[i], farthestCoors[i]).size();
+				std::cout << '\n';
+			}*/
+
 			bool isPlayerMoved = false;
-			/*char press = _getche();
+			char press = _getche();
+			
 			switch (press)
 			{
 			case 'w':
@@ -100,63 +102,55 @@ public:
 			case 'a':
 				isPlayerMoved = m_labyrinth -> movePlayer(LEFT);
 				break;
-			}*/
-			isPlayerMoved = m_labyrinth->movePlayer(i[index]);
-			++index;
+			}
 			if(isPlayerMoved)
 				m_labyrinth -> moveEnemies();
-			Sleep(300);
 			system("cls");	
 		}
 
 		if (!m_labyrinth ->isPlayerCaughtByEnemy())
 		{
+			//WIN
 			win();
-			//std::cout << "WIN\n";
 		}
 		else
 		{
+			//LOSE
+			lose();
 			stop();
-			//std::cout << "LOSE\n";
 		}
 	}
-
-	/// <summary>
-	/// Showing solution of labyrinth
-	/// </summary>
-	void showSolution()
-	{
-		// TODO
-		// Implement function, which prints winning strategy from starting cell
-		// This function should be called in stop(), if player wants
-		auto winVec = solve();
-		for (auto i : winVec)
-		{
-			printCoordinate(i);
-		}
-	}
-
 private:
-	// Game over print
 	void stop()
 	{
-		// TODO
-		// This function should be called in play(), if player loses. Should print GAME OVER, and stop all
-		// processes in play() 
-		slideGameOver();
-		// should be called showSolution() if user wants 
+		toSeeTheSolution();
 	}
 
 	void win()
 	{
 		slideWin();
-
 	}
 
-	std::vector<Coordinate> solve()
+	void lose()
 	{
+		slideGameOver();
+	}
 
-		
+	void toSeeTheSolution()
+	{
+		do
+		{
+			char toSeeOp;
+			printIsPlayerWantsToShowSolutionFrame();
+			toSeeOp = _getche();
+			if (toSeeOp == '1')
+			{
+				showSolution();
+				break;
+			}
+			else if (toSeeOp == '2')
+				break;
+		} while (true);
 	}
 
 	/// <summary>
@@ -204,4 +198,31 @@ private:
 				exit(0);
 		} while (true);
 	}
+
+	/// <summary>
+	/// Showing solution of labyrinth
+	/// </summary>
+	void showSolution()
+	{
+		auto winningPath = m_labyrinth->getWinPath();
+		std::size_t index = 0;
+
+		m_labyrinth -> setPlayerPosition(m_labyrinth -> getEntrance());
+		m_labyrinth -> restoreEnemy();
+		m_labyrinth -> restoreBoard();
+		while (!m_labyrinth -> isPlayerCaughtByEnemy() && !m_labyrinth -> isMazeSolved())// here should be isAlive player()
+		{
+			m_labyrinth -> printBoard();
+			bool isPlayerMoved = false;
+			isPlayerMoved = m_labyrinth->movePlayer(winningPath[index]);
+			if (isPlayerMoved)
+			{
+				m_labyrinth -> moveEnemies();
+				++index;
+			}
+			Sleep(70);
+			system("cls");
+		}
+	}
+
 };
