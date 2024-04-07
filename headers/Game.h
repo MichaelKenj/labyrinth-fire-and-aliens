@@ -60,13 +60,21 @@ public:
 		// TODO
 		// Implement here game logic
 
+		m_labyrinth->printBoard();
+		auto i = m_labyrinth->findIntersectionCoordinate(m_labyrinth->getWinPath());
+		for (auto u : i)
+		{
+			auto coor = m_labyrinth->findFarthestEmptyCell(u);
+			std::cout << "(" << u.first << ";" << u.second << ") -> " <<
+				"(" << coor.first << ";" << coor.second << ")\n";
+		}
 		// check is player alive in Player
 		// Put this while into separate function later
-		while (!m_labyrinth -> isPlayerCaughtByEnemy() && !m_labyrinth -> isMazeSolved())// here should be isAlive player()
-		{
-			m_labyrinth -> printBoard();
+		//while (!m_labyrinth -> isPlayerCaughtByEnemy() && !m_labyrinth -> isMazeSolved())// here should be isAlive player()
+		//{
+			//m_labyrinth -> printBoard();
 			// move move logic into separate function
-			bool isPlayerMoved = false;
+			/*bool isPlayerMoved = false;
 			char press = _getche();
 			switch (press)
 			{
@@ -84,9 +92,12 @@ public:
 				break;
 			}
 			if(isPlayerMoved)
-				m_labyrinth -> moveEnemies();
-			system("cls");	
-		}
+				m_labyrinth -> moveEnemies();*/
+			//system("cls");	
+			
+			/*int a;
+			std::cin >> a;*/
+		//}
 
 		/// Indicate if the game is lost or won
 		if (!m_labyrinth ->isPlayerCaughtByEnemy())

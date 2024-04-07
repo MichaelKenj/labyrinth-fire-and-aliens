@@ -57,13 +57,13 @@ std::vector<Coordinate> getNeighbouringCoordinates(const Coordinate coor, const 
 	if (coor.first > 0)
 		res_vec.push_back(Coordinate{ coor.first - 1, coor.second });
 
-	if (coor.first < board.size())
+	if (coor.first < board.size() - 1)
 		res_vec.push_back(Coordinate{ coor.first + 1, coor.second });
 
 	if (coor.second > 0)
 		res_vec.push_back(Coordinate{ coor.first, coor.second - 1 });
 
-	if (coor.second < board.size())
+	if (coor.second < board.size() - 1)
 		res_vec.push_back(Coordinate{ coor.first, coor.second + 1 });
 
 	return res_vec;

@@ -39,6 +39,9 @@ protected:
 	Coordinate m_exit1;
 	Coordinate m_exit2;
 
+	std::vector<Coordinate> m_winningPath1;
+	std::vector<Coordinate> m_winningPath2;
+
 	std::size_t m_exitCount;
 public:
 	//virtual void solve() const noexcept = 0;
@@ -46,6 +49,24 @@ public:
 	virtual void generateEnemy() noexcept = 0;
 	// HumanPlayer.h
 	virtual bool isPlayerCaughtByEnemy() const = 0;
+
+	std::vector<Coordinate> findIntersectionCoordinate(const std::vector<Coordinate>& path)
+	{
+		std::vector<Coordinate> resultVec;
+		for (auto coor : path)
+		{
+			auto neighbouringCoors = getNeighbouringCoordinates(coor, m_board);
+			for (auto coor2 : neighbouringCoors)
+			{
+				if (!isWall(coor2) && std::find(path.begin(), path.end(), coor2) == path.end())
+				{
+					resultVec.push_back(coor);
+				}
+			}
+		}
+		return resultVec;
+		
+	}
 public:
 	/// <summary>
 	/// Generates square maze, depends on GAME_MODE, generates fire or aliens, and puts player on entrance cell
@@ -57,7 +78,6 @@ public:
 		, m_exit1{-1,-1}
 		, m_exit2{-1,-1}
 	{
-		
 	}
 
 	//----------HUMAN_PLAYER-------------

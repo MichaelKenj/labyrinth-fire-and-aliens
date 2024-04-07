@@ -34,6 +34,11 @@ public:
 				m_board[m_exit2.first][m_exit2.second] = 'E';
 			m_exitCount = exitCount;
 
+			m_winningPath1 = findPath(m_entrance, m_exit1);
+
+			if (exitCount == 2)
+				m_winningPath2 = findPath(m_entrance, m_exit2);
+
 			bool isOutterLoopBraked = false;
 			for (std::size_t i = 0; i < 30; ++i)
 			{
@@ -86,6 +91,7 @@ public:
 
 	}
 
+	
 	/// <summary>
 	/// Chooses randomly aliens's count(3-5) and puts them into board
 	/// </summary>
