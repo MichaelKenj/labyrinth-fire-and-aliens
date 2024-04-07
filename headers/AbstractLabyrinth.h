@@ -12,69 +12,81 @@
 #include "printHelperMethods.h"
 #include "Game_Mode.h"
 #include "HelperFunctions.h"
-#include <map>
-#include <unordered_map>
 
-/// <summary>
 /// TODO
-/// do bfs from player(not from aliens)
-/// 
-/// Ditarkel winning pathy, u ditarkel sax razvlletvlennianery et pathi vra
-/// u et keteric gntel amenaheracvac kety u ytex dnel enemynerin
-/// stugum enq wini vra, ete inch vor meky xangaruma iran iran chenq dnum ytex
-/// u tenc sharunak, ete qanaky chi bavararum, petq a tazuc generacnel labirinty
-/// </summary>
+///
+/// Perform bfs from player(not dfs from each alien)
+/// Move these files into separate file
+///		penetrateIntoLabyrinth()
+///		moveLeftOrRight
+///		moveUpOrDown
+///		isGoodMove
+/// Use enum in generateEntrance()
 
-struct Cell {
+struct Cell 
+{
 	int row, col;
 	bool up, down, left, right;
 	bool visited;
-
-	Cell(int r, int c) : row(r), col(c), up(true), down(true), left(true), right(true), visited(false) {}
+	Cell(int r, int c) 
+		: row(r), col(c), up(true), down(true), left(true), right(true), visited(false) 
+	{
+	}
 };
 
 class AbstractLabyrinth
 {
 protected:
 	Human_Player m_player;
-	/// Maze
 	Board m_board;
-
 	Board m_prevBoard;
-
-	/// Size of edge of the maze
 	std::size_t m_size;
-
-	/// Coordinates of entrance in the maze
 	Coordinate m_entrance;
-
-	/// Coordinates of exits in the maze
 	Coordinate m_exit;
-
 	std::vector<Coordinate> m_winningPath;
 public:
 	virtual void moveEnemies() noexcept = 0;
 	virtual bool isPlayerCaughtByEnemy() const = 0;
 	virtual void restoreEnemy() = 0;
 	virtual std::vector<Coordinate> generateEnemy() = 0;
-	virtual std::vector<Coordinate> getEnemy() const = 0;
 public:
-	/// <summary>
-	/// Generates square maze, depends on GAME_MODE, generates fire or aliens, and puts player on entrance cell
-	/// </summary>
-	/// <param name="flag"></param>
-	/// <param name="size"></param>
 	explicit AbstractLabyrinth(std::size_t size = 41)
 		: m_size(size)
 		, m_exit{-1,-1}
-	{}
+	{
+	}
 
-	//----------HUMAN_PLAYER-------------
+	void printBoard() const
+	{
+		for (const auto& row : m_board)
+		{
+			for (char cell : row)
+			{
+				if (cell == '@')
+				{
+					// Setting color red, if cell is fire
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+				}
+				else if (cell == '&')
+				{
+					// Setting color green, if cell is alien
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+				}
+				else if (cell == '±')
+				{
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
+				}
+				std::cout << std::setw(2) << cell;
+
+				// Setting back white color of console
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			}
+			std::cout << std::endl;
+		}
+	}
+	//-------------------HUMAN_PLAYER-------------------
 	bool movePlayer(DIRECTION direction)
 	{
-		//                 LEFT, UP, RIGHT, DOWN
-		//const int dx[4] = { 0, -1, 0, 1 };
-		//const int dy[4] = { -1, 0, 1, 0 };
 		Coordinate prevCoordinate = m_player.getPosition();
 		Coordinate newPossibleCoordinate;
 		newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[1], 
@@ -97,7 +109,7 @@ public:
 				m_player.getPosition().second + dy[3] };
 			break;
 		}
-		if (isValidCoord(newPossibleCoordinate))
+		if (isValidCoordinate(newPossibleCoordinate))
 		{
 			if (!isWall(newPossibleCoordinate))
 			{
@@ -113,7 +125,7 @@ public:
 	bool movePlayer(Coordinate coor)
 	{
 		auto prevCoordinate = m_player.getPosition();
-		if (isValidCoord(coor))
+		if (isValidCoordinate(coor))
 		{
 			if (!isWall(coor))
 			{
@@ -126,50 +138,19 @@ public:
 		}
 		return false;
 	}
-	//----------HUMAN_PLAYER-------------
-	
-	bool isSolvable()
+
+	void updatePlayerPosition()
 	{
-		Human_Player copy_m_player = m_player;
-
-		/// Maze
-		Board copy_m_board = m_board;
-
-		/// Size of edge of the maze
-		std::size_t copy_m_size = m_size;
-
-		/// Coordinates of entrance in the maze
-		Coordinate copy_m_entrance = m_entrance;
-
-		/// Coordinates of exits in the maze
-		Coordinate copy_m_exit = m_exit;
-
-		auto winPath = m_winningPath;
-		int index = 0;
-
-		while (!isPlayerCaughtByEnemy() && !isMazeSolved())
-		{
-
-			bool isPlayerMoved = false;
-			isPlayerMoved = movePlayer(m_winningPath[index]);
-
-			if (isPlayerMoved)
-			{
-				moveEnemies();
-				++index;
-			}
-		}
-		m_player = copy_m_player;
-		m_board = copy_m_board;
-		m_size = copy_m_size;
-		m_entrance = copy_m_entrance;
-		m_exit = copy_m_exit;
-		restoreEnemy();
-
-		return isPlayerCaughtByEnemy();
+		m_board[m_player.getPosition().first][m_player.getPosition().second] = '±';
 	}
+	
+	void putPlayerIntoBoard()
+	{
+		m_board[m_entrance.first][m_entrance.second] = '±';
+	}
+	//-----------------FOR-MAZE-GENERATION--------------
 
-	//----------ENEMY_GENERATION---------
+	//-------------FOR-ENEMY-GENERATION-----------------
 	std::vector<Coordinate> findIntersectionCoordinate(const std::vector<Coordinate>& path)
 	{
 		std::vector<Coordinate> resultVec;
@@ -185,19 +166,6 @@ public:
 			}
 		}
 		return resultVec;
-	}
-
-	bool findCoordinate2D(const std::vector<std::vector<Coordinate>>& board, Coordinate value) const
-	{
-		for (std::size_t i = 0; i < board.size(); ++i)
-		{
-			for (std::size_t j = 0; j < board[i].size(); ++j)
-			{
-				if (board[i][j] == value)
-					return true;
-			}
-		}
-		return false;
 	}
 
 	Coordinate findFarthestEmptyCell(const Coordinate& start) const {
@@ -221,7 +189,7 @@ public:
 			// Explore neighboring cells
 			for (auto neighbor : getNeighbouringCoordinates(current.first, m_board)) {
 				// Check if neighbor cell is valid, not visited, not part of the winning path or current path, and not on the boundary
-				if (!isValidCoord(neighbor) || visited[neighbor.first][neighbor.second] ||
+				if (!isValidCoordinate(neighbor) || visited[neighbor.first][neighbor.second] ||
 					std::find(current.second.begin(), current.second.end(), neighbor) != current.second.end() ||
 					std::find(m_winningPath.begin(), m_winningPath.end(), neighbor) != m_winningPath.end() ||
 					neighbor.first == 0 || neighbor.first == m_board.size() - 1 ||
@@ -241,38 +209,8 @@ public:
 
 		return farthestEmptyCell;
 	}
-	//----------ENEMY_GENERATION---------
-
-	void printBoard() const
-	{
-		for (const auto& row : m_board)
-		{
-			for (char cell : row)
-			{
-				if (cell == '@')
-				{
-					// Setting color red, if cell is fire
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
-				}
-				else if (cell == '&')
-				{
-					// Setting color green, if cell is alien
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-				}
-				else if (cell == '±')
-				{
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-				}
-				std::cout << std::setw(2) << cell;
-
-				// Setting back white color of console
-				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-			}
-			std::cout << std::endl;
-		}
-	}
-	
-	bool isValidCoord(const Coordinate& coord) const noexcept
+	//--------------IDENTIFICATION-STUFF----------------
+	bool isValidCoordinate(const Coordinate& coord) const noexcept
 	{
 		return coord.first >= 0 && coord.first < m_size && coord.second >= 0 && coord.second < m_size;
 	}
@@ -287,268 +225,63 @@ public:
 		return m_board[coor.first][coor.second] == '.';
 	}
 
-	// Game.h
 	bool isSolvableAtLeastIn5Moves() const
 	{
-		// Should call solve() and if vector.size() >= 5 -> its solvable in 5 moves
-		
 		return m_winningPath.size() >= 5;
 	}
 
-	// Game.h
 	bool isMazeSolved() const
 	{
 		return m_player.getPosition() == m_exit;
 	}
 
-	// Is exit placed in valid way(there is no wall in front of it, and its not the same as entrance
-	bool isValidExit(std::size_t exitcount)
+	// Is exit placed in a valid way(there is no wall in front of it, and it's not the same as an entrance)
+	bool isValidExit()
 	{
-		if (exitcount == 1)
-		{
-			return isWall(generateStartForGenerating(m_exit)) || m_exit == m_entrance;
-		}
-		else
-		{
-			return isWall(generateStartForGenerating(m_exit))
-				|| m_exit == m_entrance;
-		}
+		return isWall(penetrateIntoLabyrinth(m_exit)) || m_exit == m_entrance;
 	}
 	
 	void restoreBoard()
 	{
 		m_board = m_prevBoard;
 	}
-	void putPlayerIntoBoard()
-	{
-		m_board[m_entrance.first][m_entrance.second] = '±';
-	}
 
 	// Getters
-	Coordinate getPlayerPosition() const
+	Coordinate getEntrance() const
 	{
-		return m_player.getPosition();
-	}
-	Human_Player getPlayer() const {
-		return m_player;
-	}
-	Board getBoard() const {
-		return m_board;
-	}
-	std::size_t getSize() const {
-		return m_size;
-	}
-	Coordinate getEntrance() const {
 		return m_entrance;
 	}
-	Coordinate getExit1() const {
-		return m_exit;
-	}
-	auto getWinPath() const
+	std::vector<Coordinate> getWinningPath() const
 	{
 		return m_winningPath;
 	}
 
 	// Setters
-	void setPlayerPosition(Coordinate coor) {
+	void setPlayerPosition(Coordinate coor)
+	{
 		m_player.setPosition(coor);
 	}
-	void setBoard(const Board& board) {
+	void setBoard(const Board& board)
+	{
 		m_board = board;
 	}
 
-	std::vector<Coordinate> findPath(Coordinate start, Coordinate end) const
-	{
-		std::vector<std::vector<bool>> visited(m_board.size(), std::vector<bool>(m_board[0].size(), false));
-		std::vector<std::vector<Coordinate>> parent(m_board.size(), std::vector<Coordinate>(m_board[0].size()));
-
-		std::queue<Coordinate> queue;
-		queue.push(start);
-		visited[start.first][start.second] = true;
-		parent[start.first][start.second] = start;
-
-		while (!queue.empty()) {
-			Coordinate current = queue.front();
-			queue.pop();
-
-			if (current == end) {
-				break;
-			}
-
-			for (std::size_t i = 0; i < 4; ++i)
-			{
-				Coordinate next = { current.first + dx[i], current.second + dy[i] };
-				if (!isValidCoord(next))
-				{
-					continue; // Out of bounds
-				}
-				if (m_board[next.first][next.second] == '#' || visited[next.first][next.second]) {
-					continue; // Wall or already visited
-				}
-				visited[next.first][next.second] = true;
-				parent[next.first][next.second] = current;
-				queue.push(next);
-			}
-		}
-
-		// Reconstruct the path
-		std::vector<Coordinate> path;
-		Coordinate current = end;
-		while (current != start) {
-			path.push_back(current);
-			current = parent[current.first][current.second];
-		}
-		path.push_back(start);
-		std::reverse(path.begin(), path.end());
-		return path;
-	}
-
-/// <summary>
-/// Functions which solves maze
-/// </summary>
+/// Helper functions to generate board
 protected:
-	/// <summary>
-	/// Solving maze. If vector is empty => Maze is not solvable
-	/// </summary>
-	/// <returns>Vector of coordinates of winning path</returns> 
-	// Game.h
-	
-	// Game.h
-	void updatePlayerPosition()
+	// Penetrates into labyrinth  ;)
+	Coordinate penetrateIntoLabyrinth(Coordinate coordinate) const
 	{
-		m_board[m_player.getPosition().first][m_player.getPosition().second] = '±';
-	}
-	
-	/// <summary>
-	/// Helper functions to generate board
-	/// </summary>
-protected:
-	// qcenq arandzin file mej
-	// Mi hatik ners a mtnum
-	Coordinate generateStartForGenerating(const Coordinate entrance) const
-	{
-		if (entrance.first != 0 && entrance.first != m_size - 1)
+		if (coordinate.first != 0 && coordinate.first != m_size - 1)
 		{
-			std::size_t y = (entrance.second == 0) ? entrance.second + 1 : entrance.second - 1;
-			return std::make_pair(entrance.first, y);
+			std::size_t y = (coordinate.second == 0) ? coordinate.second + 1 : coordinate.second - 1;
+			return std::make_pair(coordinate.first, y);
 		}
-		else if (entrance.second != 0 && entrance.second != m_size - 1)
+		else if (coordinate.second != 0 && coordinate.second != m_size - 1)
 		{
-			std::size_t x = (entrance.first == 0) ? entrance.first + 1 : entrance.first - 1;
-			return std::make_pair(x, entrance.second);
+			std::size_t x = (coordinate.first == 0) ? coordinate.first + 1 : coordinate.first - 1;
+			return std::make_pair(x, coordinate.second);
 		}
 	}
-
-	// qcenq arandzin file mej
-	std::size_t moveLeftOrRight(DIRECTION direction, std::size_t x) const
-	{
-		if (direction == RIGHT)
-			return x + 1;
-		else if (direction == LEFT)
-			return x - 1;
-		else
-			return x;
-	}
-
-	// qcenq arandzin file mej
-	std::size_t moveUpOrDown(std::size_t direction, std::size_t y) const
-	{
-		if (direction == UP)
-			return y - 1;
-		else if (direction == DOWN)
-			return y + 1;
-		else
-			return y;
-	}
-
-	// qcenq arandzin file mej
-	bool isGoodMove(int x,int y, DIRECTION direction) const
-	{
-		x = moveLeftOrRight(direction, x);
-		y = moveUpOrDown(direction, y);
-
-		if (m_board[y][x] == '.' || x >= (m_size - 1) || x <= 0 || y <= 0 || y >= (m_size - 1))
-			return false;
-		if (direction == UP) {
-			if (m_board[y][x - 1] != '.' && m_board[y - 1][x] != '.' && m_board[y][x + 1] != '.' && m_board[y - 1][x - 1] != '.' && m_board[y - 1][x + 1] != '.')
-				return true;
-		}
-		if (direction == DOWN) {
-			if (m_board[y][x - 1] != '.' && m_board[y + 1][x] != '.' && m_board[y][x + 1] != '.' && m_board[y + 1][x - 1] != '.' && m_board[y + 1][x + 1] != '.')
-				return true;
-		}
-		if (direction == RIGHT) {
-			if (m_board[y][x + 1] != '.' && m_board[y - 1][x] != '.' && m_board[y + 1][x] != '.' && m_board[y - 1][x + 1] != '.' && m_board[y + 1][x + 1] != '.') {
-				return true;
-			}
-		}
-		if (direction == LEFT) {
-			if (m_board[y][x - 1] != '.' && m_board[y - 1][x] != '.' && m_board[y + 1][x] != '.' && m_board[y - 1][x - 1] != '.' && m_board[y + 1][x - 1] != '.') {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	// change to enum
-	void generateEntrance()
-	{
-		std::size_t side = generateRandomNumber(0, 3);
-		std::size_t entrance_x;
-		std::size_t entrance_y;
-		switch (side)
-		{
-		case 0:
-			entrance_x = generateRandomNumber(1, m_size - 2);
-			entrance_y = 0;
-			break;
-		case 1:
-			entrance_x = m_size - 1;
-			entrance_y = generateRandomNumber(1, m_size - 2);
-			break;
-		case 2:
-			entrance_x = generateRandomNumber(1, m_size - 2);
-			entrance_y = m_size - 1;
-			break;
-		case 3:
-			entrance_x = 0;
-			entrance_y = generateRandomNumber(1, m_size - 2);
-			break;
-		}
-		auto entrance = std::make_pair(entrance_x, entrance_y);
-		m_entrance = entrance;
-
-	}
-
-	std::size_t generateExits()
-	{
-		std::size_t exit_count = 1;
-		DIRECTION side1 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
-		Coordinate exit1;
-		switch (side1)
-		{
-		case UP:
-			exit1.first = 0;
-			exit1.second = generateRandomNumber(1, m_size - 2);
-			break;
-		case DOWN:
-			exit1.first = m_size - 1;
-			exit1.second = generateRandomNumber(1, m_size - 2);
-			break;
-		case LEFT:
-			exit1.first = generateRandomNumber(1, m_size - 2);
-			exit1.second = 0;
-			break;
-		case RIGHT:
-			exit1.first = generateRandomNumber(1, m_size - 2);
-			exit1.second = m_size - 1;
-			break;
-		}
-		m_exit = exit1;
-		return exit_count;
-	}
-
-	
 	void generateMaze()
 	{
 		const std::size_t rows = 20;
@@ -654,76 +387,134 @@ protected:
 		m_board[m_entrance.first][m_entrance.second] = '.';
 	}
 
-
-	void generateBoard()
+	void generateEntrance()
 	{
-		srand(time(0));
-		Coordinate start = generateStartForGenerating(m_entrance);
-		std::size_t loc_x = start.second;
-		std::size_t loc_y = start.first;
-		for (std::size_t i = 0; i < m_size; ++i)
+		std::size_t side = generateRandomNumber(0, 3);
+		std::size_t entrance_x;
+		std::size_t entrance_y;
+		switch (side)
 		{
-			for (std::size_t j = 0; j < m_size; ++j)
-				m_board[i][j] = '#';
+		case 0:
+			entrance_x = generateRandomNumber(1, m_size - 2);
+			entrance_y = 0;
+			break;
+		case 1:
+			entrance_x = m_size - 1;
+			entrance_y = generateRandomNumber(1, m_size - 2);
+			break;
+		case 2:
+			entrance_x = generateRandomNumber(1, m_size - 2);
+			entrance_y = m_size - 1;
+			break;
+		case 3:
+			entrance_x = 0;
+			entrance_y = generateRandomNumber(1, m_size - 2);
+			break;
 		}
+		auto entrance = std::make_pair(entrance_x, entrance_y);
+		m_entrance = entrance;
+	}
 
-		std::stack< std::size_t > x_values;
-		std::stack< std::size_t > y_values;
-
-		std::size_t good_move_counter = 0;
-		std::size_t direction = 0;
-
-		do
+	void generateExits()
+	{
+		std::size_t exit_count = 1;
+		DIRECTION side1 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
+		Coordinate exit;
+		switch (side1)
 		{
-			//find n good moves
-			for (std::size_t i = 0; i < 4; ++i)
-			{
-				if (isGoodMove(loc_x, loc_y, static_cast<DIRECTION>(i)))
-					++good_move_counter;
-			}
-
-			// if only 1 good move, move there
-			if (good_move_counter == 1)
-			{
-				if (isGoodMove(loc_x, loc_y, UP))
-					loc_y = moveUpOrDown(UP, loc_y);
-				else if (isGoodMove(loc_x, loc_y, DOWN))
-					loc_y = moveUpOrDown(DOWN, loc_y);
-				else if (isGoodMove(loc_x, loc_y, RIGHT))
-					loc_x = moveLeftOrRight(RIGHT, loc_x);
-				else if (isGoodMove(loc_x, loc_y, LEFT))
-					loc_x = moveLeftOrRight(LEFT, loc_x);
-			}
-
-			// if no good moves, move back in stack
-			else if (good_move_counter == 0)
-			{
-				loc_x = x_values.top();
-				loc_y = y_values.top();
-				x_values.pop();
-				y_values.pop();
-			}
-
-			//if more than 1 good move, push stack
-			else if (good_move_counter > 1)
-			{
-				x_values.push(loc_x);
-				y_values.push(loc_y);
-				do
-				{
-					direction = rand() % 4;
-				} while (!isGoodMove(loc_x, loc_y, static_cast<DIRECTION>(direction)));
-
-				loc_x = moveLeftOrRight(static_cast<DIRECTION>(direction), loc_x);
-				loc_y = moveUpOrDown(static_cast<DIRECTION>(direction), loc_y);
-			}
-			m_board[loc_y][loc_x] = '.';
-			good_move_counter = 0;
-
-		} while (!x_values.empty());
-		m_board[m_entrance.first][m_entrance.second] = '.';
+		case UP:
+			exit.first = 0;
+			exit.second = generateRandomNumber(1, m_size - 2);
+			break;
+		case DOWN:
+			exit.first = m_size - 1;
+			exit.second = generateRandomNumber(1, m_size - 2);
+			break;
+		case LEFT:
+			exit.first = generateRandomNumber(1, m_size - 2);
+			exit.second = 0;
+			break;
+		case RIGHT:
+			exit.first = generateRandomNumber(1, m_size - 2);
+			exit.second = m_size - 1;
+			break;
+		}
+		m_exit = exit;
 	}
 
 	// Returning path vector of coordinates from start to end
-	
+	std::vector<Coordinate> findPath(Coordinate start, Coordinate end) const
+	{
+		std::vector<std::vector<bool>> visited(m_board.size(), std::vector<bool>(m_board[0].size(), false));
+		std::vector<std::vector<Coordinate>> parent(m_board.size(), std::vector<Coordinate>(m_board[0].size()));
+
+		std::queue<Coordinate> queue;
+		queue.push(start);
+		visited[start.first][start.second] = true;
+		parent[start.first][start.second] = start;
+
+		while (!queue.empty()) {
+			Coordinate current = queue.front();
+			queue.pop();
+
+			if (current == end) {
+				break;
+			}
+
+			for (std::size_t i = 0; i < 4; ++i)
+			{
+				Coordinate next = { current.first + dx[i], current.second + dy[i] };
+				if (!isValidCoordinate(next))
+				{
+					continue; // Out of bounds
+				}
+				if (m_board[next.first][next.second] == '#' || visited[next.first][next.second]) {
+					continue; // Wall or already visited
+				}
+				visited[next.first][next.second] = true;
+				parent[next.first][next.second] = current;
+				queue.push(next);
+			}
+		}
+
+		// Reconstruct the path
+		std::vector<Coordinate> path;
+		Coordinate current = end;
+		while (current != start) {
+			path.push_back(current);
+			current = parent[current.first][current.second];
+		}
+		path.push_back(start);
+		std::reverse(path.begin(), path.end());
+		return path;
+	}
+
+	// Solves labyrinth and restores initial data of labyrinth
+	bool isSolvable()
+	{
+		Board copy_m_board = m_board;
+
+		auto winPath = m_winningPath;
+		int index = 0;
+
+		while (!isPlayerCaughtByEnemy() && !isMazeSolved())
+		{
+
+			bool isPlayerMoved = false;
+			isPlayerMoved = movePlayer(m_winningPath[index]);
+
+			if (isPlayerMoved)
+			{
+				moveEnemies();
+				++index;
+			}
+		}
+
+		// Restoring
+		m_board = copy_m_board;
+		m_player.setPosition(m_entrance);
+		restoreEnemy();
+
+		return isPlayerCaughtByEnemy();
+	}
 };

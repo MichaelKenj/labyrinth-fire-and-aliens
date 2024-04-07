@@ -6,31 +6,25 @@ class FireLabyrinth final : public AbstractLabyrinth
 private:
 	std::vector < Coordinate > m_firePositions;
 	std::vector < Coordinate > m_prevFirePositions;
-
 public:
 	FireLabyrinth()
 	{
 		do
 		{
-			// Filling board with '#'
 			m_board.assign(m_size, std::vector<char>(m_size, '#'));
 
-			// Generates entrance
 			generateEntrance();
 			generateMaze();
 
 			m_player.setPosition(m_entrance);
 			putPlayerIntoBoard();
 
-			std::size_t exitCount;
 			do
 			{
-				exitCount = generateExits();
-			} while (isValidExit(exitCount));
+				generateExits();
+			} while (isValidExit());
 
 			m_board[m_exit.first][m_exit.second] = 'E';
-
-			// If exits too near to entrance, generate another board
 
 			m_winningPath.clear();
 			m_winningPath = findPath(m_entrance, m_exit);
@@ -39,26 +33,28 @@ public:
 				continue;
 
 			auto possibleEnemyPositions = generateEnemy();
-			//removeDuplicatesFromVector(possibleEnemyPositions);
 			if (possibleEnemyPositions.size() >= 1)
 			{
-				// Choosing enemy count
 				std::size_t enemyCount = generateRandomNumber(1, possibleEnemyPositions.size());
+
 				for (std::size_t i = 0; i < enemyCount; ++i)
 					m_firePositions.push_back(possibleEnemyPositions[i]);
 				m_prevFirePositions = m_firePositions;
+
 				for (auto i : m_firePositions)
 					m_board[i.first][i.second] = '@';
 				m_prevBoard = m_board;
 				break;
 			}
-		} while (!isSolvable());
 
+		} while (!isSolvable());
 	}
 
-	/// <summary>
-	/// Spread fire to empty neighbouring cells
-	/// </summary>
+	bool isPlayerCaughtByEnemy() const
+	{
+		return m_player.isPlayerCaughtByEnemy(m_firePositions);
+	}
+
 	void moveEnemies() noexcept
 	{
 		if (isPlayerCaughtByEnemy())
@@ -78,7 +74,7 @@ public:
 			for (const auto& neighbor : neighbors)
 			{
 				// Checking statement
-				if (isValidCoord(neighbor))
+				if (isValidCoordinate(neighbor))
 				{
 					if (!isWall(neighbor) && m_board[neighbor.first][neighbor.second] != '@'
 						&& neighbor != m_exit)
@@ -95,11 +91,7 @@ public:
 		m_firePositions.insert(m_firePositions.end(), newFirePositions.begin(), newFirePositions.end());
 	}
 
-	std::vector<Coordinate> getEnemy() const
-	{
-		return m_firePositions;
-	}
-
+	//---------------------ENEMY-GENERATION-------------------
 	std::vector<Coordinate> generateEnemy()
 	{
 		m_firePositions.clear();
@@ -123,14 +115,8 @@ public:
 		}
 		return enemyPosition;
 	}
-
 	void restoreEnemy()
 	{
 		m_firePositions = m_prevFirePositions;
-	}
-	// HumanPlayer.h 
-	bool isPlayerCaughtByEnemy() const
-	{
-		return m_player.isPlayerCaughtByEnemy(m_firePositions);
 	}
 };

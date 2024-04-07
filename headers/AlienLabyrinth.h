@@ -11,26 +11,20 @@ public:
 	{
 		do
 		{
-			// Filling board with '#'
 			m_board.assign(m_size, std::vector<char>(m_size, '#'));
 
-			// Generates entrance
 			generateEntrance();
-
 			generateMaze();
 
 			m_player.setPosition(m_entrance);
 			putPlayerIntoBoard();
 
-			std::size_t exitCount;
 			do
 			{
-				exitCount = generateExits();
-			} while (isValidExit(exitCount));
+				generateExits();
+			} while (isValidExit());
 
 			m_board[m_exit.first][m_exit.second] = 'E';
-
-			// If exits too near to entrance, generate another board
 
 			m_winningPath.clear();
 			m_winningPath = findPath(m_entrance, m_exit);
@@ -41,11 +35,12 @@ public:
 			auto possibleEnemyPositions = generateEnemy();
 			if (possibleEnemyPositions.size() >= 3)
 			{
-				// Choosing enemy count
 				std::size_t enemyCount = generateRandomNumber(3, possibleEnemyPositions.size());
+
 				for (std::size_t i = 0; i < enemyCount; ++i)
 					m_alienPositions.push_back(possibleEnemyPositions[i]);
 				m_prevAlienPositions = m_alienPositions;
+
 				for (auto i : m_alienPositions)
 					m_board[i.first][i.second] = '&';
 				m_prevBoard = m_board;
@@ -55,13 +50,11 @@ public:
 		} while (!isSolvable());
 	}
 
-	// HumanPlayer.h 
 	bool isPlayerCaughtByEnemy() const
 	{
 		return m_player.isPlayerCaughtByEnemy(m_alienPositions);
 	}
-	
-	// AlienPlayer.h
+
 	void moveEnemies() noexcept
 	{
 		if (isPlayerCaughtByEnemy())
@@ -76,11 +69,7 @@ public:
 		}
 	}
 
-	std::vector<Coordinate> getEnemy() const
-	{
-		return m_alienPositions;
-	}
-
+	//---------------------ENEMY-GENERATION-------------------
 	std::vector<Coordinate> generateEnemy()
 	{
 		m_alienPositions.clear();
@@ -104,7 +93,6 @@ public:
 		}
 		return enemyPosition;
 	}
-
 	void restoreEnemy() 
 	{
 		m_alienPositions = m_prevAlienPositions;

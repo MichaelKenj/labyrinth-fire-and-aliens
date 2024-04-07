@@ -84,21 +84,16 @@ void printCoordinate(Coordinate cord)
 	std::cout << "(" << cord.first << "," << cord.second << ") ";
 }
 
-///-----------PRINT FRAMES OF TITLES------------
-
 // _hell is a vector of rows of big title
 void printFrame(const std::vector<std::string>& _hell)
 {
     std::cout << "\n\n\n\n\n\n\n\n\n\n";
-    for (int i = 0; i < _hell.size(); ++i)
+    for (std::size_t i = 0; i < _hell.size(); ++i)
     {
         std::cout << _hell[i] << '\n';
     }
-
 }
-///-----------FOR HELLO------------
 
-// Sliding Hello
 void slideGameOver()
 {  
     std::string row1 = " ±±±±  ±±±  ±   ± ±±±±±       ±±±  ±   ± ±±±±± ±±±± ";
@@ -107,10 +102,10 @@ void slideGameOver()
     std::string row4 = "±   ± ±   ± ±   ± ±          ±   ±  ± ±  ±     ±   ±";
     std::string row5 = "±±±±  ±   ± ±   ± ±±±±±       ±±±    ±   ±±±±± ±   ±";
     std::vector<std::string> _hello{ row1, row2, row3, row4, row5};
-    int spaces = 10;
+    int spaces = 28;
 
     std::string sps = "";
-    for (int i = 0; i < 50; ++i)
+    for (std::size_t i = 0; i < 50; ++i)
         sps += " ";
     for (std::size_t i = 0; i < _hello.size(); ++i)
     {
@@ -144,10 +139,10 @@ void slideWin()
     std::string row4 = "   ±±±±± ±±±±±      ±±±   ±±± ±±±±± ";
     std::string row5 = "    ±±±   ±±±       ±±±   ±±±   ±±± ";
     std::vector<std::string> _hello{ row1, row2, row3, row4, row5 };
-    int spaces = 10;
+    int spaces = 28;
 
     std::string sps = "";
-    for (int i = 0; i < 50; ++i)
+    for (std::size_t i = 0; i < 50; ++i)
         sps += " ";
     for (std::size_t i = 0; i < _hello.size(); ++i)
     {
@@ -172,4 +167,3 @@ void slideWin()
     }
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
 }
-///-----------FOR MENU-------------
