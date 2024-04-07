@@ -39,11 +39,12 @@ public:
 				continue;
 
 			auto possibleEnemyPositions = generateEnemy();
-			//removeDuplicatesFromVector(possibleEnemyPositions);
-
-			if (possibleEnemyPositions.size() >= 3 && possibleEnemyPositions.size() <= 5)
+			if (possibleEnemyPositions.size() >= 3)
 			{
-				m_alienPositions = possibleEnemyPositions;
+				// Choosing enemy count
+				std::size_t enemyCount = generateRandomNumber(3, possibleEnemyPositions.size());
+				for (std::size_t i = 0; i < enemyCount; ++i)
+					m_alienPositions.push_back(possibleEnemyPositions[i]);
 				m_prevAlienPositions = m_alienPositions;
 				for (auto i : m_alienPositions)
 					m_board[i.first][i.second] = '&';
@@ -73,7 +74,6 @@ public:
 			m_board[newPosition.first][newPosition.second] = '&';
 			m_alienPositions[i] = newPosition;
 		}
-
 	}
 
 	std::vector<Coordinate> getEnemy() const
@@ -88,15 +88,16 @@ public:
 		std::vector<Coordinate> intersections = findIntersectionCoordinate(m_winningPath);
 
 		//Intersection - farthest
-		std::map<Coordinate, Coordinate> interFarthest;
+		std::vector<std::pair<Coordinate, Coordinate>> interFarthest;
+
 		for (const auto& coordinate : intersections)
 		{
-			interFarthest[coordinate] = findFarthestEmptyCell(coordinate);
+			interFarthest.push_back(std::make_pair(coordinate, findFarthestEmptyCell(coordinate)));
 		}
 
 		for (const auto& coordinate : interFarthest)
 		{
-			if (findPath(m_entrance, coordinate.first).size() + 1 < findPath(coordinate.first, coordinate.second).size())
+			if (findPath(m_entrance, coordinate.first).size()  < findPath(coordinate.first, coordinate.second).size())
 			{
 				enemyPosition.push_back(coordinate.second);
 			}

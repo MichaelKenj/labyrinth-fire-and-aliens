@@ -40,16 +40,18 @@ public:
 
 			auto possibleEnemyPositions = generateEnemy();
 			//removeDuplicatesFromVector(possibleEnemyPositions);
-			if (possibleEnemyPositions.size() >= 3 && possibleEnemyPositions.size() <= 5)
+			if (possibleEnemyPositions.size() >= 1)
 			{
-				m_firePositions = possibleEnemyPositions;
+				// Choosing enemy count
+				std::size_t enemyCount = generateRandomNumber(1, possibleEnemyPositions.size());
+				for (std::size_t i = 0; i < enemyCount; ++i)
+					m_firePositions.push_back(possibleEnemyPositions[i]);
 				m_prevFirePositions = m_firePositions;
 				for (auto i : m_firePositions)
 					m_board[i.first][i.second] = '@';
 				m_prevBoard = m_board;
 				break;
 			}
-
 		} while (!isSolvable());
 
 	}
@@ -103,18 +105,18 @@ public:
 		m_firePositions.clear();
 		std::vector<Coordinate> enemyPosition;
 		std::vector<Coordinate> intersections = findIntersectionCoordinate(m_winningPath);
-		std::vector<Coordinate> farthestCooridantes;
 
 		//Intersection - farthest
-		std::map<Coordinate, Coordinate> interFarthest;
+		std::vector<std::pair<Coordinate, Coordinate>> interFarthest;
+		
 		for (const auto& coordinate : intersections)
 		{
-			interFarthest[coordinate] = findFarthestEmptyCell(coordinate);
+			interFarthest.push_back(std::make_pair(coordinate, findFarthestEmptyCell(coordinate)));
 		}
 
 		for (const auto& coordinate : interFarthest)
 		{
-			if (findPath(m_player.getPosition(), coordinate.first).size() > findPath(coordinate.first, coordinate.second).size())
+			if (findPath(m_entrance, coordinate.first).size() + 1 < findPath(coordinate.first, coordinate.second).size())
 			{
 				enemyPosition.push_back(coordinate.second);
 			}
