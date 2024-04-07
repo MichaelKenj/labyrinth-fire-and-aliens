@@ -60,7 +60,7 @@ void printChooseGameModeFrame()
 
 void printCoordinate(Coordinate cord)
 {
-	std::cout << "(" << cord.first << "," << cord.second << ")\n";
+	std::cout << "(" << cord.first << "," << cord.second << ") ";
 }
 
 ///-----------PRINT FRAMES OF TITLES------------
@@ -96,6 +96,43 @@ void slideGameOver()
         _hello[i] = sps + _hello[i];
     }
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+    while (spaces >= 0)
+    {
+        printFrame(_hello);
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+
+        --spaces;
+        if (spaces == 0)
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+        system("cls");
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0,0 });
+        for (std::size_t i = 0; i < _hello.size(); ++i)
+        {
+            _hello[i].erase(0, 1);
+        }
+    }
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+}
+
+void slideWin()
+{
+    std::string row1 = "±±±           ±±±   ±±±   ±±±   ±±± ";
+    std::string row2 = " ±±±         ±±±    ±±±   ±±±±  ±±± ";
+    std::string row3 = "  ±±± ±±±±± ±±±     ±±±   ±±±±±±±±± ";
+    std::string row4 = "   ±±±±± ±±±±±      ±±±   ±±± ±±±±± ";
+    std::string row5 = "    ±±±   ±±±       ±±±   ±±±   ±±± ";
+    std::vector<std::string> _hello{ row1, row2, row3, row4, row5 };
+    int spaces = 10;
+
+    std::string sps = "";
+    for (int i = 0; i < 50; ++i)
+        sps += " ";
+    for (std::size_t i = 0; i < _hello.size(); ++i)
+    {
+        _hello[i] = sps + _hello[i];
+    }
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
     while (spaces >= 0)
     {
         printFrame(_hello);

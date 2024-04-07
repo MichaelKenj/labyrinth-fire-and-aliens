@@ -1,8 +1,7 @@
 #pragma once
-#include "AbstractPlayer.h"
 #include "HelperFunctions.h"
 
-class Human_Player final : public AbstractPlayer
+class Human_Player 
 {
 private:
 	Coordinate m_position;
@@ -35,15 +34,5 @@ public:
 	{
 		return std::find(enemyPositions.begin(), enemyPositions.end(), m_position) != enemyPositions.end();
 		
-	}
-
-	bool isPlayerCaughtByEnemy(const std::vector<Alien_Player>& enemyPositions) const
-	{
-		for (std::size_t i = 0; i < enemyPositions.size(); ++i)
-		{
-			if (enemyPositions[i].getPosition() == m_position)
-				return true;
-		}
-		return false;
 	}
 };

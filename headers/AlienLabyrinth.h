@@ -4,13 +4,13 @@
 class AlienLabyrinth final : public AbstractLabyrinth
 {
 private:
-	std::vector < Alien_Player > m_AlienPositions;
+	std::vector < Coordinate > m_AlienPositions;
 public:
 	AlienLabyrinth()
 	{
 		do
 		{
-		// Filling board with '#'
+			// Filling board with '#'
 			m_board.assign(m_size, std::vector<char>(m_size, '#'));
 
 			// Generates entrance
@@ -25,8 +25,6 @@ public:
 			do
 			{
 				exitCount = generateExits();
-				//stex mi angam miangamic won tvec, aysinqn exitn u entrance hamynkav, dra hamar avelacreci
-				// es paymany
 			} while (isValidExit(exitCount));
 
 			m_board[m_exit1.first][m_exit1.second] = 'E';
@@ -34,10 +32,9 @@ public:
 				m_board[m_exit2.first][m_exit2.second] = 'E';
 			m_exitCount = exitCount;
 
-			m_winningPath1 = findPath(m_entrance, m_exit1);
-
+			m_winningPaths.push_back(findPath(m_entrance, m_exit1));
 			if (exitCount == 2)
-				m_winningPath2 = findPath(m_entrance, m_exit2);
+				m_winningPaths.push_back(findPath(m_entrance, m_exit2));
 
 			bool isOutterLoopBraked = false;
 			for (std::size_t i = 0; i < 30; ++i)
@@ -57,18 +54,6 @@ public:
 		
 	}
 
-	AlienLabyrinth(const AlienLabyrinth& other)
-		: AbstractLabyrinth(other.m_size), m_AlienPositions(other.m_AlienPositions) {
-		// Copy the player position
-		m_player = other.m_player;
-		// Copy the board
-		m_board = other.m_board;
-		// Copy the entrance and exits
-		m_entrance = other.m_entrance;
-		m_exit1 = other.m_exit1;
-		m_exit2 = other.m_exit2;
-	}
-
 	// HumanPlayer.h 
 	bool isPlayerCaughtByEnemy() const
 	{
@@ -83,10 +68,10 @@ public:
 
 		for (std::size_t i = 0; i < m_AlienPositions.size(); ++i)
 		{
-			Coordinate newPosition = findPath(m_AlienPositions[i].getPosition(), m_player.getPosition())[1];
-			m_board[m_AlienPositions[i].getPosition().first][m_AlienPositions[i].getPosition().second] = '.';
+			Coordinate newPosition = findPath(m_AlienPositions[i], m_player.getPosition())[1];
+			m_board[m_AlienPositions[i].first][m_AlienPositions[i].second] = '.';
 			m_board[newPosition.first][newPosition.second] = '&';
-			m_AlienPositions[i].setPosition(newPosition);
+			m_AlienPositions[i] = newPosition;
 		}
 
 	}
@@ -118,7 +103,7 @@ public:
 			// Setting '&' into board
 			m_board[new_coor.first][new_coor.second] = '&';
 
-			m_AlienPositions.push_back(Alien_Player(new_coor));
+			m_AlienPositions.push_back(new_coor);
 		}
 	}	
 };

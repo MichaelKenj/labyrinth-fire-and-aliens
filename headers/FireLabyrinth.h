@@ -4,12 +4,10 @@
 class FireLabyrinth final : public AbstractLabyrinth
 {
 private:
-	/// Contains coordinates of enemy object(Fire or Aliens) in the maze
 	std::vector < Coordinate > m_firePositions;
 public:
 	FireLabyrinth()
 	{
-
 		do
 		{
 			// Filling board with '#'
@@ -27,8 +25,6 @@ public:
 			do
 			{
 				exitCount = generateExits();
-				//stex mi angam miangamic won tvec, aysinqn exitn u entrance hamynkav, dra hamar avelacreci
-				// es paymany
 			} while (isValidExit(exitCount));
 
 			m_board[m_exit1.first][m_exit1.second] = 'E';
@@ -36,11 +32,10 @@ public:
 				m_board[m_exit2.first][m_exit2.second] = 'E';
 			m_exitCount = exitCount;
 
-			m_winningPath1 = findPath(m_entrance, m_exit1);
-
+			m_winningPaths.push_back(findPath(m_entrance, m_exit1));
 			if (exitCount == 2)
-				m_winningPath2 = findPath(m_entrance, m_exit2);
-			
+				m_winningPaths.push_back(findPath(m_entrance, m_exit2));
+
 			bool isOutterLoopBraked = false;
 			for (std::size_t i = 0; i < 30; ++i)
 			{
@@ -57,6 +52,7 @@ public:
 		} while (!isSolvableAtLeastIn5Moves());
 		
 	}
+
 	/// <summary>
 	/// Spread fire to empty neighbouring cells
 	/// </summary>
@@ -92,7 +88,7 @@ public:
 			}
 		}
 
-		// Adding new fire positions into _enemy_positions
+		// Adding new fire positions into m_firePositions
 		m_firePositions.insert(m_firePositions.end(), newFirePositions.begin(), newFirePositions.end());
 	}
 
@@ -105,7 +101,7 @@ public:
 		std::size_t fire_count;
 		fire_count = generateRandomNumber(1, 3);
 
-		// Generating random coordinates of fires and push_back-ing them into _enemy_positions
+		// Generating random coordinates of fires and push_back-ing them into m_firePositions
 		for (std::size_t i = 0; i < fire_count; ++i)
 		{
 			Coordinate new_coor;
@@ -119,7 +115,7 @@ public:
 				);
 			} while (isWall(new_coor));
 
-			// Setting '@' into board
+			// Setting fires as '@' into board
 			m_board[new_coor.first][new_coor.second] = '@';
 
 			m_firePositions.push_back(new_coor);

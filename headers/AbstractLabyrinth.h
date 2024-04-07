@@ -39,8 +39,7 @@ protected:
 	Coordinate m_exit1;
 	Coordinate m_exit2;
 
-	std::vector<Coordinate> m_winningPath1;
-	std::vector<Coordinate> m_winningPath2;
+	std::vector<std::vector<Coordinate>> m_winningPaths;
 
 	std::size_t m_exitCount;
 public:
@@ -49,24 +48,6 @@ public:
 	virtual void generateEnemy() noexcept = 0;
 	// HumanPlayer.h
 	virtual bool isPlayerCaughtByEnemy() const = 0;
-
-	std::vector<Coordinate> findIntersectionCoordinate(const std::vector<Coordinate>& path)
-	{
-		std::vector<Coordinate> resultVec;
-		for (auto coor : path)
-		{
-			auto neighbouringCoors = getNeighbouringCoordinates(coor, m_board);
-			for (auto coor2 : neighbouringCoors)
-			{
-				if (!isWall(coor2) && std::find(path.begin(), path.end(), coor2) == path.end())
-				{
-					resultVec.push_back(coor);
-				}
-			}
-		}
-		return resultVec;
-		
-	}
 public:
 	/// <summary>
 	/// Generates square maze, depends on GAME_MODE, generates fire or aliens, and puts player on entrance cell
@@ -77,8 +58,8 @@ public:
 		: m_size(size)
 		, m_exit1{-1,-1}
 		, m_exit2{-1,-1}
-	{
-	}
+		, m_exitCount(0)
+	{}
 
 	//----------HUMAN_PLAYER-------------
 	bool movePlayer(DIRECTION direction)
@@ -139,6 +120,93 @@ public:
 	}
 	//----------HUMAN_PLAYER-------------
 
+	std::vector<Coordinate> findIntersectionCoordinate(const std::vector<Coordinate>& path)
+	{
+		std::vector<Coordinate> resultVec;
+		for (auto coor : path)
+		{
+			auto neighbouringCoors = getNeighbouringCoordinates(coor, m_board);
+			for (auto coor2 : neighbouringCoors)
+			{
+				//std::find(path.begin(), path.end(), coor2) == path.end()
+				if (!isWall(coor2) && !findCoordinate2D(m_winningPaths, coor2))
+				{
+					resultVec.push_back(coor);
+				}
+			}
+		}
+		return resultVec;
+
+	}
+
+	std::vector<std::vector<Coordinate>> findIntersectionCoordinate(const std::vector<std::vector<Coordinate>>& winningpaths)
+	{
+		std::vector<std::vector<Coordinate>> resultVec;
+		for (auto veccoor : winningpaths)
+		{
+			resultVec.push_back(findIntersectionCoordinate(veccoor));
+		}
+		return resultVec;
+
+	}
+
+	bool findCoordinate2D(const std::vector<std::vector<Coordinate>>& board, Coordinate value) const
+	{
+		for (std::size_t i = 0; i < board.size(); ++i)
+		{
+			for (std::size_t j = 0; j < board[i].size(); ++j)
+			{
+				if (board[i][j] == value)
+					return true;
+			}
+		}
+		return false;
+	}
+
+	Coordinate findFarthestEmptyCell(const Coordinate& start) const {
+		std::vector<std::vector<bool>> visited(m_board.size(), std::vector<bool>(m_board[0].size(), false));
+
+		// BFS queue
+		std::queue<std::pair<Coordinate, std::vector<Coordinate>>> queue;
+		queue.push({ start, {start} }); // Store the path as well
+		visited[start.first][start.second] = true;
+
+		// Farthest empty cell
+		Coordinate farthestEmptyCell = start;
+
+		// Perform BFS
+		while (!queue.empty()) {
+			auto current = queue.front();
+			queue.pop();
+
+			farthestEmptyCell = current.first;  // Update farthest empty cell
+
+			// Explore neighboring cells
+			for (auto neighbor : getNeighbouringCoordinates(current.first, m_board)) {
+				// Check if neighbor cell is valid, not visited, not part of the winning path or current path, and not on the boundary
+				if (!isValidCoord(neighbor) || visited[neighbor.first][neighbor.second] ||
+					std::find(current.second.begin(), current.second.end(), neighbor) != current.second.end() ||
+					findCoordinate2D(m_winningPaths, neighbor) ||
+					//std::find(m_winningPath1.begin(), m_winningPath1.end(), neighbor) != m_winningPath1.end() ||
+					//std::find(m_winningPath2.begin(), m_winningPath2.end(), neighbor) != m_winningPath2.end() ||
+					neighbor.first == 0 || neighbor.first == m_board.size() - 1 ||
+					neighbor.second == 0 || neighbor.second == m_board[0].size() - 1 ||
+					isWall(neighbor))
+				{
+					continue;
+				}
+
+				// Visit the neighbor cell
+				visited[neighbor.first][neighbor.second] = true;
+				auto newPath = current.second;
+				newPath.push_back(neighbor);
+				queue.push({ neighbor, newPath });
+			}
+		}
+
+		return farthestEmptyCell;
+	}
+
 	void printBoard() const
 	{
 		for (const auto& row : m_board)
@@ -187,16 +255,11 @@ public:
 	bool isSolvableAtLeastIn5Moves() const
 	{
 		// Should call solve() and if vector.size() >= 5 -> its solvable in 5 moves
-		auto winningPath = findPath(m_entrance, m_exit1);
 		if (m_exitCount == 1)
-		{
-			return winningPath.size() >= 5;
-		}
+			return m_winningPaths[0].size() >= 5;
 		else
-		{
-			auto winningPath2 = findPath(m_entrance, m_exit2);
-			return winningPath.size() >= 5 || winningPath2.size() >= 5;
-		}
+			return m_winningPaths[0].size() >= 5 || m_winningPaths[1].size() >= 5;
+
 		return false;
 	}
 
@@ -206,6 +269,7 @@ public:
 		return m_player.getPosition() == m_exit1 || m_player.getPosition() == m_exit2;
 	}
 
+	// Is exit placed in valid way(there is no wall in front of it, and its not the same as entrance
 	bool isValidExit(std::size_t exitcount)
 	{
 		if (exitcount == 1)
@@ -248,6 +312,10 @@ public:
 	}
 	Coordinate getExit2() const {
 		return m_exit2;
+	}
+	auto getWinPath() const
+	{
+		return m_winningPaths;
 	}
 
 	// Setters
@@ -391,56 +459,30 @@ protected:
 	std::size_t generateExits()
 	{
 		std::size_t exit_count = generateRandomNumber(1, 2);
-		if (exit_count == 1)
+		DIRECTION side1 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
+		Coordinate exit1;
+		switch (side1)
 		{
-			DIRECTION side1 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
-			Coordinate exit1;
-			switch (side1)
-			{
-			case UP:
-				exit1.first = 0;
-				exit1.second = generateRandomNumber(1, m_size - 2);
-				break;
-			case DOWN:
-				exit1.first = m_size - 1;
-				exit1.second = generateRandomNumber(1, m_size - 2);
-				break;
-			case LEFT:
-				exit1.first = generateRandomNumber(1, m_size - 2);
-				exit1.second = 0;
-				break;
-			case RIGHT:
-				exit1.first = generateRandomNumber(1, m_size - 2);
-				exit1.second = m_size - 1;
-				break;
-			}
-			m_exit1 = exit1;
+		case UP:
+			exit1.first = 0;
+			exit1.second = generateRandomNumber(1, m_size - 2);
+			break;
+		case DOWN:
+			exit1.first = m_size - 1;
+			exit1.second = generateRandomNumber(1, m_size - 2);
+			break;
+		case LEFT:
+			exit1.first = generateRandomNumber(1, m_size - 2);
+			exit1.second = 0;
+			break;
+		case RIGHT:
+			exit1.first = generateRandomNumber(1, m_size - 2);
+			exit1.second = m_size - 1;
+			break;
 		}
-		else
+		m_exit1 = exit1;
+		if (exit_count == 2)
 		{
-			DIRECTION side1 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
-			Coordinate exit1;
-			switch (side1)
-			{
-			case UP:
-				exit1.first = 0;
-				exit1.second = generateRandomNumber(1, m_size - 2);
-				break;
-			case DOWN:
-				exit1.first = m_size - 1;
-				exit1.second = generateRandomNumber(1, m_size - 2);
-				break;
-			case LEFT:
-				exit1.first = generateRandomNumber(1, m_size - 2);
-				exit1.second = 0;
-				break;
-			case RIGHT:
-				exit1.first = generateRandomNumber(1, m_size - 2);
-				exit1.second = m_size - 1;
-				break;
-			}
-			m_exit1 = exit1;
-
 			DIRECTION side2 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
 			Coordinate exit2;
 
@@ -469,7 +511,6 @@ protected:
 			m_exit2 = exit2;
 		}
 		return exit_count;
-
 	}
 
 	void generateBoard()
