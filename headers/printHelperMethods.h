@@ -31,11 +31,19 @@ void setCursor(bool visible, DWORD size)
 	SetConsoleCursorInfo(console, &lpCursor);
 }
 
+void ClearScreen()
+{
+    COORD cursorPosition; 
+    cursorPosition.X = 0; 
+    cursorPosition.Y = 0; 
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPosition);
+}
+
 void printMainMenuFrame()
 {
 	setCursor(0, 0);
 	srand((unsigned)time(NULL));
-	system("cls");
+	ClearScreen();
 	goToXY(10, 5); std::cout << " +------------------------------+ ";
 	goToXY(10, 6); std::cout << " |  Labyrinth: Fire and Aliens  | ";
 	goToXY(10, 7); std::cout << " +------------------------------+ ";
@@ -48,7 +56,7 @@ void printChooseGameModeFrame()
 {
 	setCursor(0, 0);
 	srand((unsigned)time(NULL));
-	system("cls");
+	ClearScreen();
 	goToXY(10, 5); std::cout << " +------------------------------+ ";
 	goToXY(10, 6); std::cout << " |        Choose game mode      | ";
 	goToXY(10, 7); std::cout << " +------------------------------+ ";
@@ -62,7 +70,7 @@ void printIsPlayerWantsToShowSolutionFrame()
 {
     setCursor(0, 0);
     srand((unsigned)time(NULL));
-    system("cls");
+    ClearScreen();
     goToXY(10, 5); std::cout << " +----------------------------------+ ";
     goToXY(10, 6); std::cout << " | Do you want to see the solution? | ";
     goToXY(10, 7); std::cout << " +----------------------------------+ ";
@@ -118,7 +126,7 @@ void slideGameOver()
         if (spaces == 0)
             std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-        system("cls");
+        ClearScreen();
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0,0 });
         for (std::size_t i = 0; i < _hello.size(); ++i)
         {
@@ -155,7 +163,7 @@ void slideWin()
         if (spaces == 0)
             std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-        system("cls");
+        ClearScreen();
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0,0 });
         for (std::size_t i = 0; i < _hello.size(); ++i)
         {

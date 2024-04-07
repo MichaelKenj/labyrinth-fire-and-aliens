@@ -39,7 +39,7 @@ public:
 
 
 		/// Clearing menu to start the gameplay
-		system("cls");
+		ClearScreen();
 	}
 
 	Game(const Game& game)
@@ -68,7 +68,7 @@ public:
 
 		while (!m_labyrinth -> isPlayerCaughtByEnemy() && !m_labyrinth -> isMazeSolved())
 		{
-			m_labyrinth->printBoard();
+			m_labyrinth -> printBoard();
 			/*std::cout << "Winning path: ";
 			for (auto i : m_labyrinth->getWinPath())
 				printCoordinate(i);
@@ -105,7 +105,7 @@ public:
 			}
 			if(isPlayerMoved)
 				m_labyrinth -> moveEnemies();
-			system("cls");	
+			ClearScreen();
 		}
 
 		if (!m_labyrinth ->isPlayerCaughtByEnemy())
@@ -220,8 +220,8 @@ private:
 				m_labyrinth -> moveEnemies();
 				++index;
 			}
-			Sleep(70);
-			system("cls");
+			Sleep(120);
+			ClearScreen();
 		}
 	}
 };
