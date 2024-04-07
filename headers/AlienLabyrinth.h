@@ -4,7 +4,8 @@
 class AlienLabyrinth final : public AbstractLabyrinth
 {
 private:
-	std::vector < Coordinate > m_AlienPositions;
+	std::vector < Coordinate > m_alienPositions;
+	std::vector < Coordinate > m_prevAlienPositions;
 public:
 	AlienLabyrinth()
 	{
@@ -16,7 +17,7 @@ public:
 			// Generates entrance
 			generateEntrance();
 
-			generateBoard();
+			generateMaze();
 
 			m_player.setPosition(m_entrance);
 			putPlayerIntoBoard();
@@ -32,50 +33,56 @@ public:
 			// If exits too near to entrance, generate another board
 
 			m_winningPath.clear();
-			m_winningPath = findShortestPath(m_entrance, m_exit);
+			m_winningPath = findPath(m_entrance, m_exit);
 			
 			if (!isSolvableAtLeastIn5Moves())
 				continue;
 
-			bool isOutterLoopBraked = false;
-			auto possibleEnemyPositions = newGenerateEnemy();
+			auto possibleEnemyPositions = generateEnemy();
+			//removeDuplicatesFromVector(possibleEnemyPositions);
 			if (possibleEnemyPositions.size() >= 3 && possibleEnemyPositions.size() <= 5)
 			{
-				m_AlienPositions = possibleEnemyPositions;
-				for (auto i : m_AlienPositions)
+				m_alienPositions = possibleEnemyPositions;
+				m_prevAlienPositions = m_alienPositions;
+				for (auto i : m_alienPositions)
 					m_board[i.first][i.second] = '&';
+				m_prevBoard = m_board;
 				break;
 			}
-		} while (true);
 
-		
+		} while (!isSolvable());
 	}
 
 	// HumanPlayer.h 
 	bool isPlayerCaughtByEnemy() const
 	{
-		return m_player.isPlayerCaughtByEnemy(m_AlienPositions);
+		return m_player.isPlayerCaughtByEnemy(m_alienPositions);
 	}
-
+	
 	// AlienPlayer.h
 	void moveEnemies() noexcept
 	{
 		if (isPlayerCaughtByEnemy())
 			return;
 
-		for (std::size_t i = 0; i < m_AlienPositions.size(); ++i)
+		for (std::size_t i = 0; i < m_alienPositions.size(); ++i)
 		{
-			Coordinate newPosition = findShortestPath(m_AlienPositions[i], m_player.getPosition())[1];
-			m_board[m_AlienPositions[i].first][m_AlienPositions[i].second] = '.';
+			Coordinate newPosition = findPath(m_alienPositions[i], m_player.getPosition())[1];
+			m_board[m_alienPositions[i].first][m_alienPositions[i].second] = '.';
 			m_board[newPosition.first][newPosition.second] = '&';
-			m_AlienPositions[i] = newPosition;
+			m_alienPositions[i] = newPosition;
 		}
 
 	}
 
-	std::vector<Coordinate> newGenerateEnemy()
+	std::vector<Coordinate> getEnemy() const
 	{
-		m_AlienPositions.clear();
+		return m_alienPositions;
+	}
+
+	std::vector<Coordinate> generateEnemy()
+	{
+		m_alienPositions.clear();
 		std::vector<Coordinate> enemyPosition;
 		std::vector<Coordinate> intersections = findIntersectionCoordinate(m_winningPath);
 
@@ -88,11 +95,16 @@ public:
 
 		for (const auto& coordinate : interFarthest)
 		{
-			if (findShortestPath(m_entrance, coordinate.first).size() < findShortestPath(coordinate.first, coordinate.second).size())
+			if (findPath(m_entrance, coordinate.first).size() + 1 < findPath(coordinate.first, coordinate.second).size())
 			{
 				enemyPosition.push_back(coordinate.second);
 			}
 		}
 		return enemyPosition;
+	}
+
+	void restoreEnemy() 
+	{
+		m_alienPositions = m_prevAlienPositions;
 	}
 };

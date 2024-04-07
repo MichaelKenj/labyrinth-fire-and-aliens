@@ -5,6 +5,8 @@ class FireLabyrinth final : public AbstractLabyrinth
 {
 private:
 	std::vector < Coordinate > m_firePositions;
+	std::vector < Coordinate > m_prevFirePositions;
+
 public:
 	FireLabyrinth()
 	{
@@ -15,6 +17,7 @@ public:
 
 			// Generates entrance
 			generateEntrance();
+
 			generateMaze();
 
 			m_player.setPosition(m_entrance);
@@ -31,21 +34,24 @@ public:
 			// If exits too near to entrance, generate another board
 
 			m_winningPath.clear();
-			m_winningPath = findShortestPath(m_entrance, m_exit);
+			m_winningPath = findPath(m_entrance, m_exit);
 
 			if (!isSolvableAtLeastIn5Moves())
 				continue;
 
-			bool isOutterLoopBraked = false;
-			auto possibleEnemyPositions = newGenerateEnemy();
-			if (possibleEnemyPositions.size() >= 1 && possibleEnemyPositions.size() <= 3)
+			auto possibleEnemyPositions = generateEnemy();
+			//removeDuplicatesFromVector(possibleEnemyPositions);
+			if (possibleEnemyPositions.size() >= 3 && possibleEnemyPositions.size() <= 5)
 			{
 				m_firePositions = possibleEnemyPositions;
+				m_prevFirePositions = m_firePositions;
 				for (auto i : m_firePositions)
 					m_board[i.first][i.second] = '@';
+				m_prevBoard = m_board;
 				break;
 			}
-		} while (true);
+
+		} while (!isSolvable());
 
 	}
 
@@ -88,7 +94,12 @@ public:
 		m_firePositions.insert(m_firePositions.end(), newFirePositions.begin(), newFirePositions.end());
 	}
 
-	std::vector<Coordinate> newGenerateEnemy()
+	std::vector<Coordinate> getEnemy() const
+	{
+		return m_firePositions;
+	}
+
+	std::vector<Coordinate> generateEnemy()
 	{
 		m_firePositions.clear();
 		std::vector<Coordinate> enemyPosition;
@@ -104,7 +115,7 @@ public:
 
 		for (const auto& coordinate : interFarthest)
 		{
-			if (findShortestPath(m_player.getPosition(), coordinate.first).size() > findShortestPath(coordinate.first, coordinate.second).size())
+			if (findPath(m_player.getPosition(), coordinate.first).size() > findPath(coordinate.first, coordinate.second).size())
 			{
 				enemyPosition.push_back(coordinate.second);
 			}
@@ -112,6 +123,10 @@ public:
 		return enemyPosition;
 	}
 
+	void restoreEnemy()
+	{
+		m_firePositions = m_prevFirePositions;
+	}
 	// HumanPlayer.h 
 	bool isPlayerCaughtByEnemy() const
 	{

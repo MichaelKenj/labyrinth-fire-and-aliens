@@ -27,14 +27,23 @@ struct Cell {
 	bool up, down, left, right;
 	bool visited;
 
+
+struct Cell {
+	int row, col;
+	bool up, down, left, right;
+	bool visited;
+
 	Cell(int r, int c) : row(r), col(c), up(true), down(true), left(true), right(true), visited(false) {}
 };
+
 class AbstractLabyrinth
 {
 protected:
 	Human_Player m_player;
 	/// Maze
 	Board m_board;
+
+	Board m_prevBoard;
 
 	/// Size of edge of the maze
 	std::size_t m_size;
@@ -47,12 +56,11 @@ protected:
 
 	std::vector<Coordinate> m_winningPath;
 public:
-	//virtual void solve() const noexcept = 0;
 	virtual void moveEnemies() noexcept = 0;
-	//virtual void generateEnemy() noexcept = 0;
-	virtual std::vector<Coordinate> newGenerateEnemy() = 0;
-	// HumanPlayer.h
 	virtual bool isPlayerCaughtByEnemy() const = 0;
+	virtual void restoreEnemy() = 0;
+	virtual std::vector<Coordinate> generateEnemy() = 0;
+	virtual std::vector<Coordinate> getEnemy() const = 0;
 public:
 	/// <summary>
 	/// Generates square maze, depends on GAME_MODE, generates fire or aliens, and puts player on entrance cell
@@ -119,6 +127,46 @@ public:
 	}
 	//----------HUMAN_PLAYER-------------
 	
+	bool isSolvable()
+	{
+		Human_Player copy_m_player = m_player;
+		/// Maze
+		Board copy_m_board = m_board;
+
+		/// Size of edge of the maze
+		std::size_t copy_m_size = m_size;
+
+		/// Coordinates of entrance in the maze
+		Coordinate copy_m_entrance = m_entrance;
+
+		/// Coordinates of exits in the maze
+		Coordinate copy_m_exit = m_exit;
+
+
+
+		auto winPath = m_winningPath;
+		int index = 0;
+		while (!isPlayerCaughtByEnemy() && !isMazeSolved())// here should be isAlive player()
+		{
+
+			bool isPlayerMoved = false;
+			isPlayerMoved = movePlayer(m_winningPath[index]);
+
+			if (isPlayerMoved)
+			{
+				moveEnemies();
+				++index;
+			}
+		}
+		m_player = copy_m_player;
+		m_board = copy_m_board;
+		m_size = copy_m_size;
+		m_entrance = copy_m_entrance;
+		m_exit = copy_m_exit;
+
+		return isPlayerCaughtByEnemy();
+	}
+
 	//----------ENEMY_GENERATION---------
 	std::vector<Coordinate> findIntersectionCoordinate(const std::vector<Coordinate>& path)
 	{
@@ -265,6 +313,10 @@ public:
 		}
 	}
 	
+	void restoreBoard()
+	{
+		m_board = m_prevBoard;
+	}
 	void putPlayerIntoBoard()
 	{
 		m_board[m_entrance.first][m_entrance.second] = '±';
@@ -296,31 +348,22 @@ public:
 	}
 
 	// Setters
-	void setPlayer(const Human_Player& player) {
-		m_player = player;
+	void setPlayerPosition(Coordinate coor) {
+		m_player.setPosition(coor);
 	}
 	void setBoard(const Board& board) {
 		m_board = board;
 	}
-	void setSize(std::size_t size) {
-		m_size = size;
-	}
-	void setEntrance(const Coordinate& entrance) {
-		m_entrance = entrance;
-	}
-	void setExit1(const Coordinate& exit1) {
-		m_exit = exit1;
-	}
 
-	std::vector<Coordinate> findShortestPath(const Coordinate& start, const Coordinate& end) const
+	std::vector<Coordinate> findPath(Coordinate start, Coordinate end) const
 	{
 		std::vector<std::vector<bool>> visited(m_board.size(), std::vector<bool>(m_board[0].size(), false));
-		std::vector<std::vector<int>> distance(m_board.size(), std::vector<int>(m_board[0].size(), -1)); // Initialize all distances to -1
+		std::vector<std::vector<Coordinate>> parent(m_board.size(), std::vector<Coordinate>(m_board[0].size()));
 
 		std::queue<Coordinate> queue;
 		queue.push(start);
 		visited[start.first][start.second] = true;
-		distance[start.first][start.second] = 0; // Distance from start to start is 0
+		parent[start.first][start.second] = start;
 
 		while (!queue.empty()) {
 			Coordinate current = queue.front();
@@ -341,26 +384,17 @@ public:
 					continue; // Wall or already visited
 				}
 				visited[next.first][next.second] = true;
-				distance[next.first][next.second] = distance[current.first][current.second] + 1; // Increment distance
+				parent[next.first][next.second] = current;
 				queue.push(next);
 			}
 		}
 
-		// Reconstruct the shortest path
+		// Reconstruct the path
 		std::vector<Coordinate> path;
 		Coordinate current = end;
-		int shortestDistance = distance[end.first][end.second];
-		while (shortestDistance > 0) {
+		while (current != start) {
 			path.push_back(current);
-			for (std::size_t i = 0; i < 4; ++i)
-			{
-				Coordinate next = { current.first + dx[i], current.second + dy[i] };
-				if (isValidCoord(next) && distance[next.first][next.second] == shortestDistance - 1) {
-					current = next;
-					shortestDistance--;
-					break;
-				}
-			}
+			current = parent[current.first][current.second];
 		}
 		path.push_back(start);
 		std::reverse(path.begin(), path.end());
@@ -619,6 +653,113 @@ protected:
 
 	
 
+	const int rows = 20;
+	const int cols = 20;
+	const char wall = '#';
+	const char space = '.';
+	void generateMaze()
+	{
+		std::vector<std::vector<Cell>> cells(rows, std::vector<Cell>(cols, Cell(0, 0)));
+
+		srand(time(0));
+		int startRow = rand() % rows;
+		int startCol = rand() % cols;
+
+		std::stack<std::pair<int, int>> cellStack;
+		cellStack.push(std::make_pair(startRow, startCol));
+		cells[startRow][startCol].visited = true;
+
+		while (!cellStack.empty()) {
+			int currentRow = cellStack.top().first;
+			int currentCol = cellStack.top().second;
+			std::vector<DIRECTION> directions{ UP, DOWN, LEFT, RIGHT };
+			random_shuffle(directions.begin(), directions.end());
+			bool hasUnvisitedNeighbor = false;
+
+			for (DIRECTION dir : directions) {
+				int newRow = currentRow;
+				int newCol = currentCol;
+
+				switch (dir) {
+				case UP:
+					newRow--;
+					if (newRow >= 0 && !cells[newRow][newCol].visited)
+					{
+						cells[currentRow][currentCol].up = false;
+						cells[newRow][newCol].down = false;
+						cellStack.push(std::make_pair(newRow, newCol));
+						cells[newRow][newCol].visited = true;
+						hasUnvisitedNeighbor = true;
+					}
+					break;
+				case DOWN:
+					newRow++;
+					if (newRow < rows && !cells[newRow][newCol].visited)
+					{
+						cells[currentRow][currentCol].down = false;
+						cells[newRow][newCol].up = false;
+						cellStack.push(std::make_pair(newRow, newCol));
+						cells[newRow][newCol].visited = true;
+						hasUnvisitedNeighbor = true;
+					}
+					break;
+				case LEFT:
+					newCol--;
+					if (newCol >= 0 && !cells[newRow][newCol].visited)
+					{
+						cells[currentRow][currentCol].left = false;
+						cells[newRow][newCol].right = false;
+						cellStack.push(std::make_pair(newRow, newCol));
+						cells[newRow][newCol].visited = true;
+						hasUnvisitedNeighbor = true;
+					}
+					break;
+				case RIGHT:
+					newCol++;
+					if (newCol < cols && !cells[newRow][newCol].visited)
+					{
+						cells[currentRow][currentCol].right = false;
+						cells[newRow][newCol].left = false;
+						cellStack.push(std::make_pair(newRow, newCol));
+						cells[newRow][newCol].visited = true;
+						hasUnvisitedNeighbor = true;
+					}
+					break;
+				}
+				if (hasUnvisitedNeighbor)
+					break;
+			}
+
+			if (!hasUnvisitedNeighbor)
+				cellStack.pop();
+		}
+
+		// Fill maze with walls
+		m_board.assign(rows * 2 + 1, std::vector<char>(cols * 2 + 1, wall));
+
+		// Fill empty spaces
+		for (int r = 0; r < rows; ++r)
+		{
+			for (int c = 0; c < cols; ++c)
+			{
+				int mazeRow = r * 2 + 1;
+				int mazeCol = c * 2 + 1;
+				m_board[mazeRow][mazeCol] = space;
+
+				if (!cells[r][c].up)
+					m_board[mazeRow - 1][mazeCol] = space;
+				if (!cells[r][c].down)
+					m_board[mazeRow + 1][mazeCol] = space;
+				if (!cells[r][c].left)
+					m_board[mazeRow][mazeCol - 1] = space;
+				if (!cells[r][c].right)
+					m_board[mazeRow][mazeCol + 1] = space;
+			}
+		}
+		m_board[m_entrance.first][m_entrance.second] = '.';
+	}
+
+
 	void generateBoard()
 	{
 		srand(time(0));
@@ -689,49 +830,5 @@ protected:
 	}
 
 	// Returning path vector of coordinates from start to end
-	std::vector<Coordinate> findPath(Coordinate start, Coordinate end) const
-	{
-		std::vector<std::vector<bool>> visited(m_board.size(), std::vector<bool>(m_board[0].size(), false));
-		std::vector<std::vector<Coordinate>> parent(m_board.size(), std::vector<Coordinate>(m_board[0].size()));
-
-		std::queue<Coordinate> queue;
-		queue.push(start);
-		visited[start.first][start.second] = true;
-		parent[start.first][start.second] = start;
-
-		while (!queue.empty()) {
-			Coordinate current = queue.front();
-			queue.pop();
-
-			if (current == end) {
-				break;
-			}
-
-			for (std::size_t i = 0; i < 4; ++i)
-			{
-				Coordinate next = { current.first + dx[i], current.second + dy[i] };
-				if (!isValidCoord(next))
-				{
-					continue; // Out of bounds
-				}
-				if (m_board[next.first][next.second] == '#' || visited[next.first][next.second]) {
-					continue; // Wall or already visited
-				}
-				visited[next.first][next.second] = true;
-				parent[next.first][next.second] = current;
-				queue.push(next);
-			}
-		}
-
-		// Reconstruct the path
-		std::vector<Coordinate> path;
-		Coordinate current = end;
-		while (current != start) {
-			path.push_back(current);
-			current = parent[current.first][current.second];
-		}
-		path.push_back(start);
-		std::reverse(path.begin(), path.end());
-		return path;
-	}
+	
 };

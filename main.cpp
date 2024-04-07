@@ -2,7 +2,10 @@
 
 int main()
 {
-	Game game;
-	game.play();
+	while (true) 
+	{
+		Game game;
+		game.play();
+	}
 	return 0;
 }
