@@ -41,7 +41,7 @@ public:
 					m_alienPositions.push_back(possibleEnemyPositions[i]);
 				m_prevAlienPositions = m_alienPositions;
 
-				for (auto i : m_alienPositions)
+				for (const auto& i : m_alienPositions)
 					m_board[i.first][i.second] = '&';
 				m_prevBoard = m_board;
 				break;

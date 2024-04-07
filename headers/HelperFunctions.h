@@ -29,7 +29,7 @@ std::size_t generateRandomNumber(std::size_t x, std::size_t y)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> dis(x, y);
+	std::uniform_int_distribution<std::size_t> dis(x, y);
 	return dis(gen);
 }
 

@@ -41,7 +41,7 @@ public:
 					m_firePositions.push_back(possibleEnemyPositions[i]);
 				m_prevFirePositions = m_firePositions;
 
-				for (auto i : m_firePositions)
+				for (const auto& i : m_firePositions)
 					m_board[i.first][i.second] = '@';
 				m_prevBoard = m_board;
 				break;

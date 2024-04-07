@@ -151,13 +151,13 @@ public:
 	//-----------------FOR-MAZE-GENERATION--------------
 
 	//-------------FOR-ENEMY-GENERATION-----------------
-	std::vector<Coordinate> findIntersectionCoordinate(const std::vector<Coordinate>& path)
+	std::vector<Coordinate> findIntersectionCoordinate(const std::vector<Coordinate>& path) const
 	{
 		std::vector<Coordinate> resultVec;
-		for (auto coor : path)
+		for (const auto& coor : path)
 		{
 			auto neighbouringCoors = getNeighbouringCoordinates(coor, m_board);
-			for (auto coor2 : neighbouringCoors)
+			for (const auto& coor2 : neighbouringCoors)
 			{
 				if (!isWall(coor2) && std::find(path.begin(), path.end(), coor2) == path.end())
 				{
@@ -187,7 +187,7 @@ public:
 			farthestEmptyCell = current.first;  // Update farthest empty cell
 
 			// Explore neighboring cells
-			for (auto neighbor : getNeighbouringCoordinates(current.first, m_board)) {
+			for (const auto& neighbor : getNeighbouringCoordinates(current.first, m_board)) {
 				// Check if neighbor cell is valid, not visited, not part of the winning path or current path, and not on the boundary
 				if (!isValidCoordinate(neighbor) || visited[neighbor.first][neighbor.second] ||
 					std::find(current.second.begin(), current.second.end(), neighbor) != current.second.end() ||
