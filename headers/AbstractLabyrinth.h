@@ -21,7 +21,13 @@
 /// stugum enq wini vra, ete inch vor meky xangaruma iran iran chenq dnum ytex
 /// u tenc sharunak, ete qanaky chi bavararum, petq a tazuc generacnel labirinty
 /// </summary>
+struct Cell {
+	int row, col;
+	bool up, down, left, right;
+	bool visited;
 
+	Cell(int r, int c) : row(r), col(c), up(true), down(true), left(true), right(true), visited(false) {}
+};
 class AbstractLabyrinth
 {
 protected:
@@ -52,7 +58,7 @@ public:
 	/// </summary>
 	/// <param name="flag"></param>
 	/// <param name="size"></param>
-	explicit AbstractLabyrinth(std::size_t size = 20)
+	explicit AbstractLabyrinth(std::size_t size = 41)
 		: m_size(size)
 		, m_exit1{-1,-1}
 		, m_exit2{-1,-1}
@@ -451,6 +457,113 @@ protected:
 		return exit_count;
 
 	}
+	const int rows = 20;
+	const int cols = 20;
+	const char wall = '#';
+	const char space = '.';
+	void generateMaze() 
+	{
+		std::vector<std::vector<Cell>> cells(rows, std::vector<Cell>(cols, Cell(0, 0)));
+
+		srand(time(0));
+		int startRow = rand() % rows;
+		int startCol = rand() % cols;
+
+		std::stack<std::pair<int, int>> cellStack;
+		cellStack.push(std::make_pair(startRow, startCol));
+		cells[startRow][startCol].visited = true;
+
+		while (!cellStack.empty()) {
+			int currentRow = cellStack.top().first;
+			int currentCol = cellStack.top().second;
+			std::vector<DIRECTION> directions{ UP, DOWN, LEFT, RIGHT };
+			random_shuffle(directions.begin(), directions.end());
+			bool hasUnvisitedNeighbor = false;
+
+			for (DIRECTION dir : directions) {
+				int newRow = currentRow;
+				int newCol = currentCol;
+
+				switch (dir) {
+				case UP:
+					newRow--;
+					if (newRow >= 0 && !cells[newRow][newCol].visited) 
+					{
+						cells[currentRow][currentCol].up = false;
+						cells[newRow][newCol].down = false;
+						cellStack.push(std::make_pair(newRow, newCol));
+						cells[newRow][newCol].visited = true;
+						hasUnvisitedNeighbor = true;
+					}
+					break;
+				case DOWN:
+					newRow++;
+					if (newRow < rows && !cells[newRow][newCol].visited) 
+					{
+						cells[currentRow][currentCol].down = false;
+						cells[newRow][newCol].up = false;
+						cellStack.push(std::make_pair(newRow, newCol));
+						cells[newRow][newCol].visited = true;
+						hasUnvisitedNeighbor = true;
+					}
+					break;
+				case LEFT:
+					newCol--;
+					if (newCol >= 0 && !cells[newRow][newCol].visited)
+					{
+						cells[currentRow][currentCol].left = false;
+						cells[newRow][newCol].right = false;
+						cellStack.push(std::make_pair(newRow, newCol));
+						cells[newRow][newCol].visited = true;
+						hasUnvisitedNeighbor = true;
+					}
+					break;
+				case RIGHT:
+					newCol++;
+					if (newCol < cols && !cells[newRow][newCol].visited) 
+					{
+						cells[currentRow][currentCol].right = false;
+						cells[newRow][newCol].left = false;
+						cellStack.push(std::make_pair(newRow, newCol));
+						cells[newRow][newCol].visited = true;
+						hasUnvisitedNeighbor = true;
+					}
+					break;
+				}
+				if (hasUnvisitedNeighbor)
+					break;
+			}
+
+			if (!hasUnvisitedNeighbor)
+				cellStack.pop();
+		}
+
+		// Fill maze with walls
+		m_board.assign(rows * 2 + 1, std::vector<char>(cols * 2 + 1, wall));
+
+		// Fill empty spaces
+		for (int r = 0; r < rows; ++r)
+		{
+			for (int c = 0; c < cols; ++c) 
+			{
+				int mazeRow = r * 2 + 1;
+				int mazeCol = c * 2 + 1;
+				m_board[mazeRow][mazeCol] = space;
+
+				if (!cells[r][c].up)
+					m_board[mazeRow - 1][mazeCol] = space;
+				if (!cells[r][c].down)
+					m_board[mazeRow + 1][mazeCol] = space;
+				if (!cells[r][c].left)
+					m_board[mazeRow][mazeCol - 1] = space;
+				if (!cells[r][c].right)
+					m_board[mazeRow][mazeCol + 1] = space;
+			}
+		}
+		m_board[m_entrance.first][m_entrance.second] = '.';
+	}
+
+	
 
 	void generateBoard()
 	{
