@@ -4,13 +4,13 @@
 class AlienLabyrinth final : public AbstractLabyrinth
 {
 private:
-	std::vector < Alien_Player > m_AlienPositions;
+	std::vector < Coordinate > m_AlienPositions;
 public:
 	AlienLabyrinth()
 	{
 		do
 		{
-		// Filling board with '#'
+			// Filling board with '#'
 			m_board.assign(m_size, std::vector<char>(m_size, '#'));
 
 			// Generates entrance
@@ -25,43 +25,30 @@ public:
 			do
 			{
 				exitCount = generateExits();
-				//stex mi angam miangamic won tvec, aysinqn exitn u entrance hamynkav, dra hamar avelacreci
-				// es paymany
 			} while (isValidExit(exitCount));
 
-			m_board[m_exit1.first][m_exit1.second] = 'E';
-			if (exitCount == 2)
-				m_board[m_exit2.first][m_exit2.second] = 'E';
-			m_exitCount = exitCount;
+			m_board[m_exit.first][m_exit.second] = 'E';
+
+			// If exits too near to entrance, generate another board
+
+			m_winningPath.clear();
+			m_winningPath = findShortestPath(m_entrance, m_exit);
+			
+			if (!isSolvableAtLeastIn5Moves())
+				continue;
 
 			bool isOutterLoopBraked = false;
-			for (std::size_t i = 0; i < 30; ++i)
+			auto possibleEnemyPositions = newGenerateEnemy();
+			if (possibleEnemyPositions.size() >= 3 && possibleEnemyPositions.size() <= 5)
 			{
-				generateEnemy();
-				if (isSolvableAtLeastIn5Moves())
-				{
-					isOutterLoopBraked = true;
-					break;
-				}
-			}
-			if (isOutterLoopBraked)
+				m_AlienPositions = possibleEnemyPositions;
+				for (auto i : m_AlienPositions)
+					m_board[i.first][i.second] = '&';
 				break;
-
-		} while (!isSolvableAtLeastIn5Moves());
+			}
+		} while (true);
 
 		
-	}
-
-	AlienLabyrinth(const AlienLabyrinth& other)
-		: AbstractLabyrinth(other.m_size), m_AlienPositions(other.m_AlienPositions) {
-		// Copy the player position
-		m_player = other.m_player;
-		// Copy the board
-		m_board = other.m_board;
-		// Copy the entrance and exits
-		m_entrance = other.m_entrance;
-		m_exit1 = other.m_exit1;
-		m_exit2 = other.m_exit2;
 	}
 
 	// HumanPlayer.h 
@@ -78,41 +65,34 @@ public:
 
 		for (std::size_t i = 0; i < m_AlienPositions.size(); ++i)
 		{
-			Coordinate newPosition = findPath(m_AlienPositions[i].getPosition(), m_player.getPosition())[1];
-			m_board[m_AlienPositions[i].getPosition().first][m_AlienPositions[i].getPosition().second] = '.';
+			Coordinate newPosition = findShortestPath(m_AlienPositions[i], m_player.getPosition())[1];
+			m_board[m_AlienPositions[i].first][m_AlienPositions[i].second] = '.';
 			m_board[newPosition.first][newPosition.second] = '&';
-			m_AlienPositions[i].setPosition(newPosition);
+			m_AlienPositions[i] = newPosition;
 		}
 
 	}
 
-	/// <summary>
-	/// Chooses randomly aliens's count(3-5) and puts them into board
-	/// </summary>
-	void generateEnemy() noexcept
+	std::vector<Coordinate> newGenerateEnemy()
 	{
 		m_AlienPositions.clear();
-		// Choosing fire count randomly[3-5]
-		std::size_t alien_count;
-		alien_count = generateRandomNumber(3, 5);
+		std::vector<Coordinate> enemyPosition;
+		std::vector<Coordinate> intersections = findIntersectionCoordinate(m_winningPath);
 
-		// Generating random coordinates of aliens and push_back-ing them into _enemy_positions
-		for (std::size_t i = 0; i < alien_count; ++i)
+		//Intersection - farthest
+		std::map<Coordinate, Coordinate> interFarthest;
+		for (const auto& coordinate : intersections)
 		{
-			Coordinate new_coor;
-
-			// Generating new coordinates, while coordinate is a wall
-			do
-			{
-				new_coor = generateRandomCoordinate(
-					Coordinate{ 1,1 },
-					Coordinate{ m_size - 2, m_size - 2 });
-			} while (isWall(new_coor));
-
-			// Setting '&' into board
-			m_board[new_coor.first][new_coor.second] = '&';
-
-			m_AlienPositions.push_back(Alien_Player(new_coor));
+			interFarthest[coordinate] = findFarthestEmptyCell(coordinate);
 		}
-	}	
+
+		for (const auto& coordinate : interFarthest)
+		{
+			if (findShortestPath(m_entrance, coordinate.first).size() < findShortestPath(coordinate.first, coordinate.second).size())
+			{
+				enemyPosition.push_back(coordinate.second);
+			}
+		}
+		return enemyPosition;
+	}
 };

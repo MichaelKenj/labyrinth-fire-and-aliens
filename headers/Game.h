@@ -1,5 +1,4 @@
 #pragma once
-#include "AlienPlayer.h"
 #include "AbstractLabyrinth.h"
 #include "FireLabyrinth.h"
 #include "AlienLabyrinth.h"
@@ -57,17 +56,36 @@ public:
 	/// </summary>
 	void play()
 	{
-		// TODO
-		// Implement here game logic
-
+		
+		
+		//m_labyrinth->printBoard();
+		//auto intersections = m_labyrinth->findIntersectionCoordinate(m_labyrinth->getWinPath());
+		//std::cout << "Winning paths: ";
+		//for (auto u : m_labyrinth->getWinPath())
+		//{
+		//		printCoordinate(u);
+		//}
+		//for (auto i : intersections)
+		//{
+		//		auto coor = m_labyrinth -> findFarthestEmptyCell(i);
+		//		std::cout << "\n(" << i.first << ";" << i.second << ") -> " <<
+		//			"(" << coor.first << ";" << coor.second << ")";
+		//}
+		
+		auto i = m_labyrinth->findShortestPath(m_labyrinth->getEntrance(), m_labyrinth->getExit1());
 		// check is player alive in Player
 		// Put this while into separate function later
+		int index = 0;
 		while (!m_labyrinth -> isPlayerCaughtByEnemy() && !m_labyrinth -> isMazeSolved())// here should be isAlive player()
 		{
-			m_labyrinth -> printBoard();
-			// move move logic into separate function
+			m_labyrinth->printBoard();
+			std::cout << "Shortest path: ";
+			for (auto u : i)
+			{
+				printCoordinate(u);
+			}
 			bool isPlayerMoved = false;
-			char press = _getche();
+			/*char press = _getche();
 			switch (press)
 			{
 			case 'w':
@@ -82,17 +100,19 @@ public:
 			case 'a':
 				isPlayerMoved = m_labyrinth -> movePlayer(LEFT);
 				break;
-			}
+			}*/
+			isPlayerMoved = m_labyrinth->movePlayer(i[index]);
+			++index;
 			if(isPlayerMoved)
 				m_labyrinth -> moveEnemies();
+			Sleep(300);
 			system("cls");	
 		}
 
-		/// Indicate if the game is lost or won
 		if (!m_labyrinth ->isPlayerCaughtByEnemy())
 		{
-			//win() function
-			std::cout << "WON\n";
+			win();
+			//std::cout << "WIN\n";
 		}
 		else
 		{
@@ -104,7 +124,7 @@ public:
 	/// <summary>
 	/// Showing solution of labyrinth
 	/// </summary>
-	void show_solution()
+	void showSolution()
 	{
 		// TODO
 		// Implement function, which prints winning strategy from starting cell
@@ -123,8 +143,14 @@ private:
 		// TODO
 		// This function should be called in play(), if player loses. Should print GAME OVER, and stop all
 		// processes in play() 
-
 		slideGameOver();
+		// should be called showSolution() if user wants 
+	}
+
+	void win()
+	{
+		slideWin();
+
 	}
 
 	std::vector<Coordinate> solve()
