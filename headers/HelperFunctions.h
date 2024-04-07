@@ -7,16 +7,17 @@
 using Coordinate = std::pair<std::size_t, std::size_t>;
 using Board = std::vector<std::vector<char>>;
 
-//                 UP, DOWN, LEFT, RIGHT
-const int dx[4] = { -1, 1, 0, 0 };
-const int dy[4] = { 0, 0, -1, 1 };
+
+//                 LEFT, UP, RIGHT, DOWN
+const int dx[4] = { 0, -1, 0, 1 };
+const int dy[4] = { -1, 0, 1, 0 };
 
 enum DIRECTION
 {
-	UP,
-	DOWN,
 	LEFT,
-	RIGHT
+	UP,
+	RIGHT,
+	DOWN
 };
 
 /// <summary>
@@ -67,4 +68,9 @@ std::vector<Coordinate> getNeighbouringCoordinates(const Coordinate coor, const 
 		res_vec.push_back(Coordinate{ coor.first, coor.second + 1 });
 
 	return res_vec;
+}
+
+void removeDuplicatesFromVector(std::vector<Coordinate>& vec) {
+	std::sort(vec.begin(), vec.end()); // Sort the vector
+	vec.erase(std::unique(vec.begin(), vec.end()), vec.end()); // Remove duplicates
 }

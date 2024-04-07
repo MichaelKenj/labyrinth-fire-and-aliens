@@ -11,6 +11,7 @@
 #include "printHelperMethods.h"
 #include "Game_Mode.h"
 #include "HelperFunctions.h"
+#include <map>
 
 /// <summary>
 /// TODO
@@ -36,16 +37,14 @@ protected:
 	Coordinate m_entrance;
 
 	/// Coordinates of exits in the maze
-	Coordinate m_exit1;
-	Coordinate m_exit2;
+	Coordinate m_exit;
 
-	std::vector<std::vector<Coordinate>> m_winningPaths;
-
-	std::size_t m_exitCount;
+	std::vector<Coordinate> m_winningPath;
 public:
 	//virtual void solve() const noexcept = 0;
 	virtual void moveEnemies() noexcept = 0;
-	virtual void generateEnemy() noexcept = 0;
+	//virtual void generateEnemy() noexcept = 0;
+	virtual std::vector<Coordinate> newGenerateEnemy() = 0;
 	// HumanPlayer.h
 	virtual bool isPlayerCaughtByEnemy() const = 0;
 public:
@@ -56,38 +55,32 @@ public:
 	/// <param name="size"></param>
 	explicit AbstractLabyrinth(std::size_t size = 20)
 		: m_size(size)
-		, m_exit1{-1,-1}
-		, m_exit2{-1,-1}
-		, m_exitCount(0)
+		, m_exit{-1,-1}
 	{}
 
 	//----------HUMAN_PLAYER-------------
 	bool movePlayer(DIRECTION direction)
 	{
-		//                 UP, DOWN, LEFT, RIGHT
-		//const int dx[4] = { -1, 1, 0, 0 };
-		//const int dy[4] = { 0, 0, -1, 1 };
+		//                 LEFT, UP, RIGHT, DOWN
+		//const int dx[4] = { 0, -1, 0, 1 };
+		//const int dy[4] = { -1, 0, 1, 0 };
 		Coordinate prevCoordinate = m_player.getPosition();
 		Coordinate newPossibleCoordinate;
-		newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[0], m_player.getPosition().second + dy[0] };
+		newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[1], m_player.getPosition().second + dy[1] };
 
 		switch (direction)
 		{
+		case LEFT:
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[0], m_player.getPosition().second + dy[0] };
+			break;
 		case UP:
 			break;
-			// -1 0
-		case DOWN:
-			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[1], m_player.getPosition().second + dy[1] };
-			break;
-			// +1 0
-		case LEFT:
+		case RIGHT:
 			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[2], m_player.getPosition().second + dy[2] };
 			break;
-			// 0 -1
-		case RIGHT:
+		case DOWN:
 			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[3], m_player.getPosition().second + dy[3] };
 			break;
-			// 0 +1
 		}
 		if (isValidCoord(newPossibleCoordinate))
 		{
@@ -119,7 +112,8 @@ public:
 		return false;
 	}
 	//----------HUMAN_PLAYER-------------
-
+	
+	//----------ENEMY_GENERATION---------
 	std::vector<Coordinate> findIntersectionCoordinate(const std::vector<Coordinate>& path)
 	{
 		std::vector<Coordinate> resultVec;
@@ -128,26 +122,13 @@ public:
 			auto neighbouringCoors = getNeighbouringCoordinates(coor, m_board);
 			for (auto coor2 : neighbouringCoors)
 			{
-				//std::find(path.begin(), path.end(), coor2) == path.end()
-				if (!isWall(coor2) && !findCoordinate2D(m_winningPaths, coor2))
+				if (!isWall(coor2) && std::find(path.begin(), path.end(), coor2) == path.end())
 				{
 					resultVec.push_back(coor);
 				}
 			}
 		}
 		return resultVec;
-
-	}
-
-	std::vector<std::vector<Coordinate>> findIntersectionCoordinate(const std::vector<std::vector<Coordinate>>& winningpaths)
-	{
-		std::vector<std::vector<Coordinate>> resultVec;
-		for (auto veccoor : winningpaths)
-		{
-			resultVec.push_back(findIntersectionCoordinate(veccoor));
-		}
-		return resultVec;
-
 	}
 
 	bool findCoordinate2D(const std::vector<std::vector<Coordinate>>& board, Coordinate value) const
@@ -186,9 +167,7 @@ public:
 				// Check if neighbor cell is valid, not visited, not part of the winning path or current path, and not on the boundary
 				if (!isValidCoord(neighbor) || visited[neighbor.first][neighbor.second] ||
 					std::find(current.second.begin(), current.second.end(), neighbor) != current.second.end() ||
-					findCoordinate2D(m_winningPaths, neighbor) ||
-					//std::find(m_winningPath1.begin(), m_winningPath1.end(), neighbor) != m_winningPath1.end() ||
-					//std::find(m_winningPath2.begin(), m_winningPath2.end(), neighbor) != m_winningPath2.end() ||
+					std::find(m_winningPath.begin(), m_winningPath.end(), neighbor) != m_winningPath.end() ||
 					neighbor.first == 0 || neighbor.first == m_board.size() - 1 ||
 					neighbor.second == 0 || neighbor.second == m_board[0].size() - 1 ||
 					isWall(neighbor))
@@ -206,6 +185,7 @@ public:
 
 		return farthestEmptyCell;
 	}
+	//----------ENEMY_GENERATION---------
 
 	void printBoard() const
 	{
@@ -225,7 +205,7 @@ public:
 				}
 				else if (cell == '±')
 				{
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
 				}
 				std::cout << std::setw(2) << cell;
 
@@ -255,18 +235,14 @@ public:
 	bool isSolvableAtLeastIn5Moves() const
 	{
 		// Should call solve() and if vector.size() >= 5 -> its solvable in 5 moves
-		if (m_exitCount == 1)
-			return m_winningPaths[0].size() >= 5;
-		else
-			return m_winningPaths[0].size() >= 5 || m_winningPaths[1].size() >= 5;
-
-		return false;
+		
+		return m_winningPath.size() >= 5;
 	}
 
 	// Game.h
 	bool isMazeSolved() const
 	{
-		return m_player.getPosition() == m_exit1 || m_player.getPosition() == m_exit2;
+		return m_player.getPosition() == m_exit;
 	}
 
 	// Is exit placed in valid way(there is no wall in front of it, and its not the same as entrance
@@ -274,14 +250,12 @@ public:
 	{
 		if (exitcount == 1)
 		{
-			return isWall(generateStartForGenerating(m_exit1)) || m_exit1 == m_entrance;
+			return isWall(generateStartForGenerating(m_exit)) || m_exit == m_entrance;
 		}
 		else
 		{
-			return isWall(generateStartForGenerating(m_exit1))
-				|| isWall(generateStartForGenerating(m_exit2))
-				|| m_exit1 == m_entrance
-				|| m_exit2 == m_entrance;
+			return isWall(generateStartForGenerating(m_exit))
+				|| m_exit == m_entrance;
 		}
 	}
 	
@@ -308,14 +282,11 @@ public:
 		return m_entrance;
 	}
 	Coordinate getExit1() const {
-		return m_exit1;
-	}
-	Coordinate getExit2() const {
-		return m_exit2;
+		return m_exit;
 	}
 	auto getWinPath() const
 	{
-		return m_winningPaths;
+		return m_winningPath;
 	}
 
 	// Setters
@@ -332,10 +303,62 @@ public:
 		m_entrance = entrance;
 	}
 	void setExit1(const Coordinate& exit1) {
-		m_exit1 = exit1;
+		m_exit = exit1;
 	}
-	void setExit2(const Coordinate& exit2) {
-		m_exit2 = exit2;
+
+	std::vector<Coordinate> findShortestPath(const Coordinate& start, const Coordinate& end) const
+	{
+		std::vector<std::vector<bool>> visited(m_board.size(), std::vector<bool>(m_board[0].size(), false));
+		std::vector<std::vector<int>> distance(m_board.size(), std::vector<int>(m_board[0].size(), -1)); // Initialize all distances to -1
+
+		std::queue<Coordinate> queue;
+		queue.push(start);
+		visited[start.first][start.second] = true;
+		distance[start.first][start.second] = 0; // Distance from start to start is 0
+
+		while (!queue.empty()) {
+			Coordinate current = queue.front();
+			queue.pop();
+
+			if (current == end) {
+				break;
+			}
+
+			for (std::size_t i = 0; i < 4; ++i)
+			{
+				Coordinate next = { current.first + dx[i], current.second + dy[i] };
+				if (!isValidCoord(next))
+				{
+					continue; // Out of bounds
+				}
+				if (m_board[next.first][next.second] == '#' || visited[next.first][next.second]) {
+					continue; // Wall or already visited
+				}
+				visited[next.first][next.second] = true;
+				distance[next.first][next.second] = distance[current.first][current.second] + 1; // Increment distance
+				queue.push(next);
+			}
+		}
+
+		// Reconstruct the shortest path
+		std::vector<Coordinate> path;
+		Coordinate current = end;
+		int shortestDistance = distance[end.first][end.second];
+		while (shortestDistance > 0) {
+			path.push_back(current);
+			for (std::size_t i = 0; i < 4; ++i)
+			{
+				Coordinate next = { current.first + dx[i], current.second + dy[i] };
+				if (isValidCoord(next) && distance[next.first][next.second] == shortestDistance - 1) {
+					current = next;
+					shortestDistance--;
+					break;
+				}
+			}
+		}
+		path.push_back(start);
+		std::reverse(path.begin(), path.end());
+		return path;
 	}
 
 /// <summary>
@@ -348,7 +371,6 @@ protected:
 	/// <returns>Vector of coordinates of winning path</returns> 
 	// Game.h
 	
-
 	// Game.h
 	void updatePlayerPosition()
 	{
@@ -387,7 +409,7 @@ protected:
 	}
 
 	// qcenq arandzin file mej
-	std::size_t moveUpOrDown(int direction, int y) const
+	std::size_t moveUpOrDown(std::size_t direction, std::size_t y) const
 	{
 		if (direction == UP)
 			return y - 1;
@@ -398,7 +420,7 @@ protected:
 	}
 
 	// qcenq arandzin file mej
-	bool isGoodMove(int x, int y, DIRECTION direction) const
+	bool isGoodMove(int x,int y, DIRECTION direction) const
 	{
 		x = moveLeftOrRight(direction, x);
 		y = moveUpOrDown(direction, y);
@@ -458,7 +480,7 @@ protected:
 
 	std::size_t generateExits()
 	{
-		std::size_t exit_count = generateRandomNumber(1, 2);
+		std::size_t exit_count = 1;
 		DIRECTION side1 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
 		Coordinate exit1;
 		switch (side1)
@@ -480,36 +502,7 @@ protected:
 			exit1.second = m_size - 1;
 			break;
 		}
-		m_exit1 = exit1;
-		if (exit_count == 2)
-		{
-			DIRECTION side2 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
-			Coordinate exit2;
-
-			do
-			{
-				switch (side2)
-				{
-				case UP:
-					exit2.first = 0;
-					exit2.second = generateRandomNumber(1, m_size - 2);
-					break;
-				case DOWN:
-					exit2.first = m_size - 1;
-					exit2.second = generateRandomNumber(1, m_size - 2);
-					break;
-				case LEFT:
-					exit2.first = generateRandomNumber(1, m_size - 2);
-					exit2.second = 0;
-					break;
-				case RIGHT:
-					exit2.first = generateRandomNumber(1, m_size - 2);
-					exit2.second = m_size - 1;
-					break;
-				}
-			} while (exit2 == m_exit1);
-			m_exit2 = exit2;
-		}
+		m_exit = exit1;
 		return exit_count;
 	}
 
@@ -582,6 +575,7 @@ protected:
 		m_board[m_entrance.first][m_entrance.second] = '.';
 	}
 
+	// Returning path vector of coordinates from start to end
 	std::vector<Coordinate> findPath(Coordinate start, Coordinate end) const
 	{
 		std::vector<std::vector<bool>> visited(m_board.size(), std::vector<bool>(m_board[0].size(), false));

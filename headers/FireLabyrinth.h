@@ -27,30 +27,27 @@ public:
 				exitCount = generateExits();
 			} while (isValidExit(exitCount));
 
-			m_board[m_exit1.first][m_exit1.second] = 'E';
-			if (exitCount == 2)
-				m_board[m_exit2.first][m_exit2.second] = 'E';
-			m_exitCount = exitCount;
+			m_board[m_exit.first][m_exit.second] = 'E';
 
-			m_winningPaths.push_back(findPath(m_entrance, m_exit1));
-			if (exitCount == 2)
-				m_winningPaths.push_back(findPath(m_entrance, m_exit2));
+			// If exits too near to entrance, generate another board
+
+			m_winningPath.clear();
+			m_winningPath = findShortestPath(m_entrance, m_exit);
+
+			if (!isSolvableAtLeastIn5Moves())
+				continue;
 
 			bool isOutterLoopBraked = false;
-			for (std::size_t i = 0; i < 30; ++i)
+			auto possibleEnemyPositions = newGenerateEnemy();
+			if (possibleEnemyPositions.size() >= 1 && possibleEnemyPositions.size() <= 3)
 			{
-				generateEnemy();
-				if (isSolvableAtLeastIn5Moves())
-				{
-					isOutterLoopBraked = true;
-					break;
-				}
-			}
-			if (isOutterLoopBraked)
+				m_firePositions = possibleEnemyPositions;
+				for (auto i : m_firePositions)
+					m_board[i.first][i.second] = '@';
 				break;
+			}
+		} while (true);
 
-		} while (!isSolvableAtLeastIn5Moves());
-		
 	}
 
 	/// <summary>
@@ -58,7 +55,7 @@ public:
 	/// </summary>
 	void moveEnemies() noexcept
 	{
-		if(isPlayerCaughtByEnemy())
+		if (isPlayerCaughtByEnemy())
 		{
 			return;
 		}
@@ -77,14 +74,14 @@ public:
 				// Checking statement
 				if (isValidCoord(neighbor))
 				{
-					if (!isWall(neighbor) && m_board[neighbor.first][neighbor.second] != '@' 
-						&& neighbor != m_exit1)
+					if (!isWall(neighbor) && m_board[neighbor.first][neighbor.second] != '@'
+						&& neighbor != m_exit)
 					{
 						newFirePositions.push_back(neighbor);
 						m_board[neighbor.first][neighbor.second] = '@';
 					}
 				}
-				
+
 			}
 		}
 
@@ -92,34 +89,28 @@ public:
 		m_firePositions.insert(m_firePositions.end(), newFirePositions.begin(), newFirePositions.end());
 	}
 
-	/// <summary>
-	/// Chooses randomly fire's count[1-3] and puts them into board
-	/// </summary>
-	void generateEnemy() noexcept
+	std::vector<Coordinate> newGenerateEnemy()
 	{
-		// Choosing fire count randomly[1-3]
-		std::size_t fire_count;
-		fire_count = generateRandomNumber(1, 3);
+		m_firePositions.clear();
+		std::vector<Coordinate> enemyPosition;
+		std::vector<Coordinate> intersections = findIntersectionCoordinate(m_winningPath);
+		std::vector<Coordinate> farthestCooridantes;
 
-		// Generating random coordinates of fires and push_back-ing them into m_firePositions
-		for (std::size_t i = 0; i < fire_count; ++i)
+		//Intersection - farthest
+		std::map<Coordinate, Coordinate> interFarthest;
+		for (const auto& coordinate : intersections)
 		{
-			Coordinate new_coor;
-
-			// Generating new coordinates, while coordinate is a wall
-			do
-			{
-				new_coor = generateRandomCoordinate(
-					Coordinate{ 1,1 },
-					Coordinate{ m_size - 2, m_size - 2 }
-				);
-			} while (isWall(new_coor));
-
-			// Setting fires as '@' into board
-			m_board[new_coor.first][new_coor.second] = '@';
-
-			m_firePositions.push_back(new_coor);
+			interFarthest[coordinate] = findFarthestEmptyCell(coordinate);
 		}
+
+		for (const auto& coordinate : interFarthest)
+		{
+			if (findShortestPath(m_player.getPosition(), coordinate.first).size() > findShortestPath(coordinate.first, coordinate.second).size())
+			{
+				enemyPosition.push_back(coordinate.second);
+			}
+		}
+		return enemyPosition;
 	}
 
 	// HumanPlayer.h 

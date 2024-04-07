@@ -33,6 +33,5 @@ public:
 	bool isPlayerCaughtByEnemy(const std::vector<Coordinate>& enemyPositions) const
 	{
 		return std::find(enemyPositions.begin(), enemyPositions.end(), m_position) != enemyPositions.end();
-		
 	}
 };

@@ -58,36 +58,34 @@ public:
 	{
 		
 		
-		/*m_labyrinth->printBoard();
-		auto intersections = m_labyrinth->findIntersectionCoordinate(m_labyrinth->getWinPath());
-		std::cout << "Winning paths: ";
-		for (auto u : m_labyrinth->getWinPath())
-		{
-			for(auto j : u)
-				printCoordinate(j);
-			std::cout << "| \n";
-		}
-		for (auto u : intersections)
-		{
-			for (auto i : u)
-			{
-				auto coor = m_labyrinth -> findFarthestEmptyCell(i);
-				std::cout << "\n(" << i.first << ";" << i.second << ") -> " <<
-					"(" << coor.first << ";" << coor.second << ")";
-
-			}
-			std::cout << "\nSecond winning path---------\n";
-		}
-		*/
+		//m_labyrinth->printBoard();
+		//auto intersections = m_labyrinth->findIntersectionCoordinate(m_labyrinth->getWinPath());
+		//std::cout << "Winning paths: ";
+		//for (auto u : m_labyrinth->getWinPath())
+		//{
+		//		printCoordinate(u);
+		//}
+		//for (auto i : intersections)
+		//{
+		//		auto coor = m_labyrinth -> findFarthestEmptyCell(i);
+		//		std::cout << "\n(" << i.first << ";" << i.second << ") -> " <<
+		//			"(" << coor.first << ";" << coor.second << ")";
+		//}
 		
+		auto i = m_labyrinth->findShortestPath(m_labyrinth->getEntrance(), m_labyrinth->getExit1());
 		// check is player alive in Player
 		// Put this while into separate function later
+		int index = 0;
 		while (!m_labyrinth -> isPlayerCaughtByEnemy() && !m_labyrinth -> isMazeSolved())// here should be isAlive player()
 		{
-			m_labyrinth -> printBoard();
-			 //move move logic into separate function
+			m_labyrinth->printBoard();
+			std::cout << "Shortest path: ";
+			for (auto u : i)
+			{
+				printCoordinate(u);
+			}
 			bool isPlayerMoved = false;
-			char press = _getche();
+			/*char press = _getche();
 			switch (press)
 			{
 			case 'w':
@@ -102,15 +100,15 @@ public:
 			case 'a':
 				isPlayerMoved = m_labyrinth -> movePlayer(LEFT);
 				break;
-			}
+			}*/
+			isPlayerMoved = m_labyrinth->movePlayer(i[index]);
+			++index;
 			if(isPlayerMoved)
 				m_labyrinth -> moveEnemies();
+			Sleep(300);
 			system("cls");	
-			
-
 		}
 
-		/// Indicate if the game is lost or won
 		if (!m_labyrinth ->isPlayerCaughtByEnemy())
 		{
 			win();
@@ -154,6 +152,7 @@ private:
 		slideWin();
 
 	}
+
 	std::vector<Coordinate> solve()
 	{
 
