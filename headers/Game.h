@@ -152,7 +152,7 @@ private:
 	// Animating solution of labyrinth
 	void showSolution()
 	{
-		std::size_t index = 0;
+		std::size_t index = 1;
 
 		// Restoring initial data of labyrinth
 		auto winningPath = m_labyrinth->getWinningPath();

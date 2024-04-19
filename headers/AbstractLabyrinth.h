@@ -25,13 +25,16 @@
 
 struct Cell 
 {
-	int row, col;
-	bool up, down, left, right;
+	std::size_t row;
+	std::size_t col;
+	bool up;
+	bool down;
+	bool left; 
+	bool right;
 	bool visited;
-	Cell(int r, int c) 
+	Cell(std::size_t r, std::size_t c)
 		: row(r), col(c), up(true), down(true), left(true), right(true), visited(false) 
-	{
-	}
+	{}
 };
 
 class AbstractLabyrinth
@@ -50,11 +53,10 @@ public:
 	virtual void restoreEnemy() = 0;
 	virtual std::vector<Coordinate> generateEnemy() = 0;
 public:
-	explicit AbstractLabyrinth(std::size_t size = 41)
+	explicit AbstractLabyrinth(std::size_t size = 21)
 		: m_size(size)
 		, m_exit{-1,-1}
-	{
-	}
+	{}
 
 	void printBoard() const
 	{
@@ -74,7 +76,12 @@ public:
 				}
 				else if (cell == '±')
 				{
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
+					//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
+					system("Color 0B");
+				}
+				else if (cell == 'E')
+				{
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN);
 				}
 				std::cout << std::setw(2) << cell;
 
@@ -89,9 +96,6 @@ public:
 	{
 		Coordinate prevCoordinate = m_player.getPosition();
 		Coordinate newPossibleCoordinate;
-		newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[1], 
-			m_player.getPosition().second + dy[1] };
-
 		switch (direction)
 		{
 		case LEFT:
@@ -99,6 +103,8 @@ public:
 				m_player.getPosition().second + dy[0] };
 			break;
 		case UP:
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[1],
+				m_player.getPosition().second + dy[1] };
 			break;
 		case RIGHT:
 			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[2], 
@@ -132,7 +138,6 @@ public:
 				m_player.setPosition(coor);
 				updatePlayerPosition();
 				m_board[prevCoordinate.first][prevCoordinate.second] = '.';
-				m_player.setPosition(coor);
 				return true;
 			}
 		}
@@ -162,6 +167,7 @@ public:
 				if (!isWall(coor2) && std::find(path.begin(), path.end(), coor2) == path.end())
 				{
 					resultVec.push_back(coor);
+					break;
 				}
 			}
 		}
@@ -284,31 +290,34 @@ protected:
 	}
 	void generateMaze()
 	{
-		const std::size_t rows = 20;
-		const std::size_t cols = 20;
+		const std::size_t rows = 10;
+		const std::size_t cols = 10;
 		std::vector<std::vector<Cell>> cells(rows, std::vector<Cell>(cols, Cell(0, 0)));
 
 		srand(time(0));
-		int startRow = rand() % rows;
-		int startCol = rand() % cols;
+		std::size_t startRow = rand() % rows;
+		std::size_t startCol = rand() % cols;
 
-		std::stack<std::pair<int, int>> cellStack;
+		std::stack<std::pair<std::size_t, std::size_t>> cellStack;
 		cellStack.push(std::make_pair(startRow, startCol));
 		cells[startRow][startCol].visited = true;
 
-		while (!cellStack.empty()) {
-			int currentRow = cellStack.top().first;
-			int currentCol = cellStack.top().second;
+		while (!cellStack.empty()) 
+		{	
+			std::size_t currentRow = cellStack.top().first;
+			std::size_t currentCol = cellStack.top().second;
 			std::vector<DIRECTION> directions{ UP, DOWN, LEFT, RIGHT };
 			unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 			std::shuffle(directions.begin(), directions.end(), std::default_random_engine(seed));
 			bool hasUnvisitedNeighbor = false;
 
-			for (DIRECTION dir : directions) {
+			for (DIRECTION dir : directions) 
+			{
 				int newRow = currentRow;
 				int newCol = currentCol;
 
-				switch (dir) {
+				switch (dir) 
+				{
 				case UP:
 					--newRow;
 					if (newRow >= 0 && !cells[newRow][newCol].visited)
@@ -363,7 +372,8 @@ protected:
 		}
 
 		// Fill maze with walls
-		m_board.assign(rows * 2 + 1, std::vector<char>(cols * 2 + 1, '#'));
+		m_size = 2 * rows + 1;
+		m_board.assign(m_size, std::vector<char>(m_size, '#'));
 
 		// Fill empty spaces
 		for (std::size_t r = 0; r < rows; ++r)
@@ -415,9 +425,8 @@ protected:
 		m_entrance = entrance;
 	}
 
-	void generateExits()
+	void generateExit()
 	{
-		std::size_t exit_count = 1;
 		DIRECTION side1 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
 		Coordinate exit;
 		switch (side1)
@@ -495,11 +504,10 @@ protected:
 		Board copy_m_board = m_board;
 
 		auto winPath = m_winningPath;
-		int index = 0;
+		int index = 1;
 
 		while (!isPlayerCaughtByEnemy() && !isMazeSolved())
 		{
-
 			bool isPlayerMoved = false;
 			isPlayerMoved = movePlayer(m_winningPath[index]);
 
