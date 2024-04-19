@@ -11,8 +11,6 @@ public:
 	{
 		do
 		{
-			m_board.assign(m_size, std::vector<char>(m_size, '#'));
-
 			generateEntrance();
 			generateMaze();
 
@@ -21,12 +19,11 @@ public:
 
 			do
 			{
-				generateExits();
+				generateExit();
 			} while (isValidExit());
 
 			m_board[m_exit.first][m_exit.second] = 'E';
 
-			m_winningPath.clear();
 			m_winningPath = findPath(m_entrance, m_exit);
 			
 			if (!isSolvableAtLeastIn5Moves())
@@ -46,7 +43,6 @@ public:
 				m_prevBoard = m_board;
 				break;
 			}
-
 		} while (!isSolvable());
 	}
 
@@ -80,16 +76,14 @@ public:
 		std::vector<std::pair<Coordinate, Coordinate>> interFarthest;
 
 		for (const auto& coordinate : intersections)
-		{
 			interFarthest.push_back(std::make_pair(coordinate, findFarthestEmptyCell(coordinate)));
-		}
 
 		for (const auto& coordinate : interFarthest)
 		{
-			if (findPath(m_entrance, coordinate.first).size()  < findPath(coordinate.first, coordinate.second).size())
-			{
+			if (enemyPosition.size() >= 5)
+				break;
+			if (findPath(m_entrance, coordinate.first).size() < findPath(coordinate.first, coordinate.second).size())
 				enemyPosition.push_back(coordinate.second);
-			}
 		}
 		return enemyPosition;
 	}
