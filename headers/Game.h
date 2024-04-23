@@ -8,18 +8,17 @@
 class Game
 {
 private:
-	void createLabyrinth() 
+	std::unique_ptr<AbstractLabyrinth> m_labyrinth;
+	GameMode m_gameMode;
+
+	void createLabyrinth()
 	{
-		if (m_gameMode == FIRE) 
-			m_labyrinth = new FireLabyrinth();
-		else if (m_gameMode == ALIEN) 
-			m_labyrinth = new AlienLabyrinth();
+		if (m_gameMode == GameMode::eFire)
+			m_labyrinth = std::make_unique<FireLabyrinth>();
+		else if (m_gameMode == GameMode::eAlien)
+			m_labyrinth = std::make_unique<AlienLabyrinth>();
 	}
-private:
-	/// TODO
-	/// Change to smart pointer later
-	AbstractLabyrinth* m_labyrinth;
-	GAME_MODE m_gameMode;
+
 public:
 	Game()
 	{
@@ -28,10 +27,7 @@ public:
 		system("cls");
 	}
 
-	~Game() 
-	{
-		delete m_labyrinth;
-	}
+	~Game() = default;
 
 	// Runs game's logic
 	void play()
@@ -45,16 +41,16 @@ public:
 			switch (press)
 			{
 			case 'w':
-				isPlayerMoved = m_labyrinth->movePlayer(UP);
+				isPlayerMoved = m_labyrinth->movePlayer(Direction::eUp);
 				break;
 			case 'd':
-				isPlayerMoved = m_labyrinth->movePlayer(RIGHT);
+				isPlayerMoved = m_labyrinth->movePlayer(Direction::eRight);
 				break;
 			case 's':
-				isPlayerMoved = m_labyrinth->movePlayer(DOWN);
+				isPlayerMoved = m_labyrinth->movePlayer(Direction::eDown);
 				break;
 			case 'a':
-				isPlayerMoved = m_labyrinth->movePlayer(LEFT);
+				isPlayerMoved = m_labyrinth->movePlayer(Direction::eLeft);
 				break;
 			}
 			if(isPlayerMoved)
@@ -128,13 +124,13 @@ private:
 					choose_mode_op = _getche();
 					if (choose_mode_op == '1')
 					{
-						m_gameMode = FIRE;
+						m_gameMode = GameMode::eFire;
 						isInnerLoopBreaked = true;
 						break;
 					}
 					else if (choose_mode_op == '2')
 					{
-						m_gameMode = ALIEN;
+						m_gameMode = GameMode::eAlien;
 						isInnerLoopBreaked = true;
 						break;
 					}

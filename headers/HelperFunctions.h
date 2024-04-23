@@ -1,9 +1,6 @@
 #pragma once
 #include <random>
 
-/// <summary>
-/// Can be (0, 0) to (40, 40)
-/// </summary>
 using Coordinate = std::pair<std::size_t, std::size_t>;
 using Board = std::vector<std::vector<char>>;
 
@@ -11,12 +8,13 @@ using Board = std::vector<std::vector<char>>;
 const int dx[4] = { 0, -1, 0, 1 };
 const int dy[4] = { -1, 0, 1, 0 };
 
-enum DIRECTION
+// LEFT, UP, RIGHT, DOWN
+enum class Direction
 {
-	LEFT,
-	UP,
-	RIGHT,
-	DOWN
+	eLeft,
+	eUp,
+	eRight,
+	eDown
 };
 
 /// <summary>
@@ -36,8 +34,6 @@ std::size_t generateRandomNumber(std::size_t x, std::size_t y)
 /// <summary>
 /// Generates random coordinate from [coor1, coor2] 
 /// </summary>
-/// <param name="coor1"></param>
-/// <param name="coor2"></param>
 /// <returns></returns>
 Coordinate  generateRandomCoordinate(Coordinate coor1, Coordinate coor2)
 {
@@ -66,7 +62,24 @@ std::vector<Coordinate> getNeighbouringCoordinates(const Coordinate coor, const 
 	return res_vec;
 }
 
-void removeDuplicatesFromVector(std::vector<Coordinate>& vec) {
-	std::sort(vec.begin(), vec.end()); 
-	vec.erase(std::unique(vec.begin(), vec.end()), vec.end()); // Remove duplicates
+void setPrintColor(char cell)
+{
+	if (cell == '@')
+	{
+		// Setting color red, if cell is fire
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+	}
+	else if (cell == '&')
+	{
+		// Setting color green, if cell is alien
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+	}
+	else if (cell == '±')
+	{
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
+	}
+	else if (cell == 'E')
+	{
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN);
+	}
 }

@@ -14,28 +14,18 @@
 #include "HelperFunctions.h"
 
 /// TODO
-///
 /// Perform bfs from player(not dfs from each alien)
-/// Move these files into separate file
-///		penetrateIntoLabyrinth()
-///		moveLeftOrRight
-///		moveUpOrDown
-///		isGoodMove
-/// Use enum in generateEntrance()
 
-struct Cell 
-{
-	std::size_t row;
-	std::size_t col;
-	bool up;
-	bool down;
-	bool left; 
-	bool right;
-	bool visited;
-	Cell(std::size_t r, std::size_t c)
-		: row(r), col(c), up(true), down(true), left(true), right(true), visited(false) 
-	{}
-};
+/*
+ * Sum numbers in a vector.
+ *
+ * This sum is the arithmetic sum, not some other kind of sum that only
+ * mathematicians have heard of.
+ *
+ * @param values Container whose values are summed.
+ * @return sum of `values`, or 0.0 if `values` is empty.
+ */
+
 
 class AbstractLabyrinth
 {
@@ -64,27 +54,8 @@ public:
 		{
 			for (char cell : row)
 			{
-				if (cell == '@')
-				{
-					// Setting color red, if cell is fire
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
-				}
-				else if (cell == '&')
-				{
-					// Setting color green, if cell is alien
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-				}
-				else if (cell == '±')
-				{
-					//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
-					system("Color 0B");
-				}
-				else if (cell == 'E')
-				{
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN);
-				}
+				setPrintColor(cell);
 				std::cout << std::setw(2) << cell;
-
 				// Setting back white color of console
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 			}
@@ -92,29 +63,31 @@ public:
 		}
 	}
 	//-------------------HUMAN_PLAYER-------------------
-	bool movePlayer(DIRECTION direction)
+	bool movePlayer(Direction direction)
 	{
 		Coordinate prevCoordinate = m_player.getPosition();
 		Coordinate newPossibleCoordinate;
+
 		switch (direction)
 		{
-		case LEFT:
-			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[0], 
+		case Direction::eLeft:
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[0],
 				m_player.getPosition().second + dy[0] };
 			break;
-		case UP:
+		case Direction::eUp:
 			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[1],
 				m_player.getPosition().second + dy[1] };
 			break;
-		case RIGHT:
-			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[2], 
+		case Direction::eRight:
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[2],
 				m_player.getPosition().second + dy[2] };
 			break;
-		case DOWN:
-			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[3], 
+		case Direction::eDown:
+			newPossibleCoordinate = Coordinate{ m_player.getPosition().first + dx[3],
 				m_player.getPosition().second + dy[3] };
 			break;
 		}
+
 		if (isValidCoordinate(newPossibleCoordinate))
 		{
 			if (!isWall(newPossibleCoordinate))
@@ -241,6 +214,7 @@ public:
 		return m_player.getPosition() == m_exit;
 	}
 
+
 	// Is exit placed in a valid way(there is no wall in front of it, and it's not the same as an entrance)
 	bool isValidExit()
 	{
@@ -271,6 +245,20 @@ public:
 	{
 		m_board = board;
 	}
+private:
+	struct Cell
+	{
+		std::size_t m_row;
+		std::size_t m_col;
+		bool m_up;
+		bool m_down;
+		bool m_left;
+		bool m_right;
+		bool m_visited;
+		Cell(std::size_t r, std::size_t c)
+			: m_row(r), m_col(c), m_up(true), m_down(true), m_left(true), m_right(true), m_visited(false)
+		{}
+	};
 
 /// Helper functions to generate board
 protected:
@@ -300,65 +288,65 @@ protected:
 
 		std::stack<std::pair<std::size_t, std::size_t>> cellStack;
 		cellStack.push(std::make_pair(startRow, startCol));
-		cells[startRow][startCol].visited = true;
+		cells[startRow][startCol].m_visited = true;
 
 		while (!cellStack.empty()) 
 		{	
 			std::size_t currentRow = cellStack.top().first;
 			std::size_t currentCol = cellStack.top().second;
-			std::vector<DIRECTION> directions{ UP, DOWN, LEFT, RIGHT };
+			std::vector<Direction> directions{ Direction::eUp, Direction::eDown, Direction::eLeft, Direction::eRight };
 			unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 			std::shuffle(directions.begin(), directions.end(), std::default_random_engine(seed));
 			bool hasUnvisitedNeighbor = false;
 
-			for (DIRECTION dir : directions) 
+			for (Direction dir : directions) 
 			{
 				int newRow = currentRow;
 				int newCol = currentCol;
 
 				switch (dir) 
 				{
-				case UP:
+				case Direction::eUp:
 					--newRow;
-					if (newRow >= 0 && !cells[newRow][newCol].visited)
+					if (newRow >= 0 && !cells[newRow][newCol].m_visited)
 					{
-						cells[currentRow][currentCol].up = false;
-						cells[newRow][newCol].down = false;
+						cells[currentRow][currentCol].m_up = false;
+						cells[newRow][newCol].m_down = false;
 						cellStack.push(std::make_pair(newRow, newCol));
-						cells[newRow][newCol].visited = true;
+						cells[newRow][newCol].m_visited = true;
 						hasUnvisitedNeighbor = true;
 					}
 					break;
-				case DOWN:
+				case Direction::eDown:
 					++newRow;
-					if (newRow < rows && !cells[newRow][newCol].visited)
+					if (newRow < rows && !cells[newRow][newCol].m_visited)
 					{
-						cells[currentRow][currentCol].down = false;
-						cells[newRow][newCol].up = false;
+						cells[currentRow][currentCol].m_down = false;
+						cells[newRow][newCol].m_up = false;
 						cellStack.push(std::make_pair(newRow, newCol));
-						cells[newRow][newCol].visited = true;
+						cells[newRow][newCol].m_visited = true;
 						hasUnvisitedNeighbor = true;
 					}
 					break;
-				case LEFT:
+				case Direction::eLeft:
 					--newCol;
-					if (newCol >= 0 && !cells[newRow][newCol].visited)
+					if (newCol >= 0 && !cells[newRow][newCol].m_visited)
 					{
-						cells[currentRow][currentCol].left = false;
-						cells[newRow][newCol].right = false;
+						cells[currentRow][currentCol].m_left = false;
+						cells[newRow][newCol].m_right = false;
 						cellStack.push(std::make_pair(newRow, newCol));
-						cells[newRow][newCol].visited = true;
+						cells[newRow][newCol].m_visited = true;
 						hasUnvisitedNeighbor = true;
 					}
 					break;
-				case RIGHT:
+				case Direction::eRight:
 					++newCol;
-					if (newCol < cols && !cells[newRow][newCol].visited)
+					if (newCol < cols && !cells[newRow][newCol].m_visited)
 					{
-						cells[currentRow][currentCol].right = false;
-						cells[newRow][newCol].left = false;
+						cells[currentRow][currentCol].m_right = false;
+						cells[newRow][newCol].m_left = false;
 						cellStack.push(std::make_pair(newRow, newCol));
-						cells[newRow][newCol].visited = true;
+						cells[newRow][newCol].m_visited = true;
 						hasUnvisitedNeighbor = true;
 					}
 					break;
@@ -384,13 +372,13 @@ protected:
 				std::size_t mazeCol = c * 2 + 1;
 				m_board[mazeRow][mazeCol] = '.';
 
-				if (!cells[r][c].up)
+				if (!cells[r][c].m_up)
 					m_board[mazeRow - 1][mazeCol] = '.';
-				if (!cells[r][c].down)
+				if (!cells[r][c].m_down)
 					m_board[mazeRow + 1][mazeCol] = '.';
-				if (!cells[r][c].left)
+				if (!cells[r][c].m_left)
 					m_board[mazeRow][mazeCol - 1] = '.';
-				if (!cells[r][c].right)
+				if (!cells[r][c].m_right)
 					m_board[mazeRow][mazeCol + 1] = '.';
 			}
 		}
@@ -400,55 +388,49 @@ protected:
 	void generateEntrance()
 	{
 		std::size_t side = generateRandomNumber(0, 3);
-		std::size_t entrance_x;
-		std::size_t entrance_y;
 		switch (side)
 		{
-		case 0:
-			entrance_x = generateRandomNumber(1, m_size - 2);
-			entrance_y = 0;
+		case 0: // left
+			m_entrance.first = generateRandomNumber(1, m_size - 2);
+			m_entrance.second = 0;
 			break;
-		case 1:
-			entrance_x = m_size - 1;
-			entrance_y = generateRandomNumber(1, m_size - 2);
+		case 1: // up
+			m_entrance.first = m_size - 1;
+			m_entrance.second = generateRandomNumber(1, m_size - 2);
 			break;
-		case 2:
-			entrance_x = generateRandomNumber(1, m_size - 2);
-			entrance_y = m_size - 1;
+		case 2: // right
+			m_entrance.first = generateRandomNumber(1, m_size - 2);
+			m_entrance.second = m_size - 1;
 			break;
-		case 3:
-			entrance_x = 0;
-			entrance_y = generateRandomNumber(1, m_size - 2);
+		case 3: // down
+			m_entrance.first = 0;
+			m_entrance.second = generateRandomNumber(1, m_size - 2);
 			break;
 		}
-		auto entrance = std::make_pair(entrance_x, entrance_y);
-		m_entrance = entrance;
 	}
 
 	void generateExit()
 	{
-		DIRECTION side1 = static_cast<DIRECTION>(generateRandomNumber(0, 3));
-		Coordinate exit;
-		switch (side1)
+		std::size_t side = generateRandomNumber(0, 3);
+		switch (side)
 		{
-		case UP:
-			exit.first = 0;
-			exit.second = generateRandomNumber(1, m_size - 2);
+		case 0: // left
+			m_exit.first = generateRandomNumber(1, m_size - 2);
+			m_exit.second = 0;
 			break;
-		case DOWN:
-			exit.first = m_size - 1;
-			exit.second = generateRandomNumber(1, m_size - 2);
+		case 1: // up
+			m_exit.first = 0;
+			m_exit.second = generateRandomNumber(1, m_size - 2);
 			break;
-		case LEFT:
-			exit.first = generateRandomNumber(1, m_size - 2);
-			exit.second = 0;
+		case 2: // right
+			m_exit.first = generateRandomNumber(1, m_size - 2);
+			m_exit.second = m_size - 1;
 			break;
-		case RIGHT:
-			exit.first = generateRandomNumber(1, m_size - 2);
-			exit.second = m_size - 1;
+		case 3: // down
+			m_exit.first = m_size - 1;
+			m_exit.second = generateRandomNumber(1, m_size - 2);
 			break;
 		}
-		m_exit = exit;
 	}
 
 	// Returning path vector of coordinates from start to end

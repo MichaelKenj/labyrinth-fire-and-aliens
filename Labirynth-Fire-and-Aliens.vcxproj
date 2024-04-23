@@ -132,15 +132,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\AbstractLabyrinth.h" />
-    <ClInclude Include="headers\AbstractPlayer.h" />
     <ClInclude Include="headers\AlienLabyrinth.h" />
-    <ClInclude Include="headers\AlienPlayer.h" />
     <ClInclude Include="headers\FireLabyrinth.h" />
     <ClInclude Include="headers\Game.h" />
     <ClInclude Include="headers\Game_Mode.h" />
     <ClInclude Include="headers\HelperFunctions.h" />
     <ClInclude Include="headers\HumanPlayer.h" />
-    <ClInclude Include="headers\Labyrinth.h" />
     <ClInclude Include="headers\printHelperMethods.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
