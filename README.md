@@ -1,3 +1,0 @@
-# Labirynth-Fire-and-Aliens
-
-
